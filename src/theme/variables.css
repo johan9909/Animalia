@@ -1,2 +1,30 @@
 /* For information on how to create your own theme, please see:
 http://ionicframework.com/docs/theming/ */
+:root {
+  /* Colores Animalia - Cliente */
+  --ion-color-primary: #667eea;
+  --ion-color-primary-rgb: 102, 126, 234;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-shade: #5a6fce;
+  --ion-color-primary-tint: #758dec;
+
+  /* Colores Animalia - Veterinario */
+  --ion-color-vet: #11998e;
+  --ion-color-vet-rgb: 17, 153, 142;
+  --ion-color-vet-contrast: #ffffff;
+  --ion-color-vet-shade: #0f877d;
+  --ion-color-vet-tint: #29a399;
+
+  /* Gradientes personalizados */
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-vet: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+/* Clase personalizada para color veterinario */
+.ion-color-vet {
+  --ion-color-base: var(--ion-color-vet);
+  --ion-color-base-rgb: var(--ion-color-vet-rgb);
+  --ion-color-contrast: var(--ion-color-vet-contrast);
+  --ion-color-shade: var(--ion-color-vet-shade);
+  --ion-color-tint: var(--ion-color-vet-tint);
+}

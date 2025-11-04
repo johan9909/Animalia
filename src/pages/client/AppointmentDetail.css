@@ -1,0 +1,121 @@
+.appointment-detail-content {
+  padding: 20px;
+}
+
+.appointment-detail-content h3 {
+  color: #2c3e50;
+  margin: 12px 0;
+  font-size: 22px;
+}
+
+.detail-time {
+  color: #667eea;
+  font-size: 18px;
+  font-weight: 600;
+  margin: 15px 0 20px;
+  line-height: 1.6;
+}
+
+.detail-section {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 18px;
+  margin-top: 18px;
+}
+
+.detail-section h4 {
+  color: #2c3e50;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.detail-section p {
+  color: #666;
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.detail-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.pet-avatar-small,
+.vet-avatar-small {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.pet-avatar-small {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.vet-avatar-small {
+  background: #667eea;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.detail-row strong {
+  display: block;
+  color: #2c3e50;
+  margin-bottom: 3px;
+  font-size: 16px;
+}
+
+.detail-row p {
+  color: #999;
+  font-size: 13px;
+  margin: 2px 0;
+}
+
+.price {
+  color: #667eea;
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 8px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.badge-info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+ion-button {
+  text-transform: none;
+  font-weight: 600;
+  --border-radius: 12px;
+  height: 50px;
+  margin-top: 12px;
+}
