@@ -1,0 +1,7 @@
+{
+  "name": "animalia",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "react-vite"
+}
