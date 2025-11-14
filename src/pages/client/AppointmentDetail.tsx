@@ -12,7 +12,7 @@ import {
   IonButton
 } from '@ionic/react';
 import { useParams } from 'react-router-dom';
-import databaseService from '../../services/database.service';
+import sqliteService from '../../services/sqlite.service';
 import './AppointmentDetail.css';
 
 interface AppointmentDetailParams {
@@ -27,19 +27,19 @@ const AppointmentDetail: React.FC = () => {
 
   useEffect(() => {
     // Cargar cita
-    const allAppointments = databaseService.getAppointments();
-    const foundAppointment = allAppointments.find(a => a.id === parseInt(id));
+    const allAppointments = sqliteService.getAppointments();
+    const foundAppointment = allAppointments.find((a : any) => a.id === parseInt(id));
     setAppointment(foundAppointment);
 
     if (foundAppointment) {
       // Cargar mascota
-      const allPets = databaseService.getPets();
-      const foundPet = allPets.find(p => p.id === foundAppointment.mascotaId);
+      const allPets = sqliteService.getPets();
+      const foundPet = allPets.find((p : any)=> p.id === foundAppointment.mascotaId);
       setPet(foundPet);
 
       // Cargar veterinario
-      const allUsers = databaseService.getUsers();
-      const foundVet = allUsers.find(u => u.id === foundAppointment.veterinarioId);
+      const allUsers = sqliteService.getUsers();
+      const foundVet = allUsers.find((u : any) => u.id === foundAppointment.veterinarioId);
       setVet(foundVet);
     }
   }, [id]);

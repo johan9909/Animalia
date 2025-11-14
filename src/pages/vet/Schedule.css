@@ -1,0 +1,233 @@
+.vet-toolbar {
+  --background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.vet-toolbar-sub {
+  --background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --min-height: 40px;
+}
+
+.schedule-content {
+  padding: 20px;
+  padding-bottom: 80px;
+}
+
+.day-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  padding-bottom: 5px;
+}
+
+.day-btn {
+  --background: white;
+  --color: #666;
+  --border-radius: 8px;
+  --box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  --padding-start: 20px;
+  --padding-end: 20px;
+  text-transform: none;
+  font-weight: 600;
+  min-width: 90px;
+}
+
+.day-btn-active {
+  --background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --color: white;
+  --border-radius: 8px;
+  --box-shadow: 0 4px 12px rgba(17, 153, 142, 0.3);
+  --padding-start: 20px;
+  --padding-end: 20px;
+  text-transform: none;
+  font-weight: 700;
+  min-width: 90px;
+}
+
+.schedule-card {
+  margin-bottom: 15px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.schedule-card:active {
+  transform: scale(0.98);
+}
+
+.schedule-card-completed {
+  background: #f0fff4;
+  border-left: 5px solid #11998e;
+}
+
+.schedule-card-progress {
+  background: #fffef0;
+  border-left: 5px solid #ffa500;
+}
+
+.schedule-card-pending {
+  border-left: 5px solid #11998e;
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.schedule-time {
+  color: #11998e;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.schedule-service {
+  color: #2c3e50;
+  margin: 8px 0;
+  font-size: 18px;
+}
+
+.schedule-patient {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.patient-emoji {
+  font-size: 32px;
+}
+
+.schedule-patient strong {
+  display: block;
+  color: #2c3e50;
+  margin-bottom: 3px;
+  font-size: 15px;
+}
+
+.schedule-patient p {
+  color: #999;
+  font-size: 13px;
+  margin: 0;
+}
+
+.lunch-break {
+  text-align: center;
+  padding: 25px;
+  background: #fafafa;
+  border-radius: 12px;
+  margin: 20px 0;
+}
+
+.lunch-icon {
+  font-size: 40px;
+  margin-bottom: 10px;
+}
+
+.lunch-break p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.lunch-break strong {
+  font-size: 16px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-icon {
+  font-size: 80px;
+  margin-bottom: 20px;
+  opacity: 0.5;
+}
+
+.empty-state h3 {
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: #999;
+}
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.badge-info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.vet-tab-bar {
+  --background: white;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.vet-tab-bar ion-tab-button {
+  --color: #999;
+  --color-selected: #11998e;
+}
+
+.vet-tab-bar ion-tab-button.active {
+  --color: #11998e;
+}
+
+
+/* Navegación inferior personalizada */
+.custom-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  z-index: 1000;
+}
+
+.custom-bottom-nav .nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #999;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 5px 15px;
+  transition: all 0.3s;
+}
+
+.custom-bottom-nav .nav-item:active {
+  transform: scale(0.95);
+}
+
+.custom-bottom-nav .nav-item.active {
+  color: #11998e;
+}
+
+.custom-bottom-nav .nav-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+

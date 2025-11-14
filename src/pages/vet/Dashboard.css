@@ -1,24 +1,85 @@
-.dashboard-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.vet-header {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   padding: 50px 25px 25px;
   color: white;
 }
 
-.dashboard-header h1 {
+.vet-header h1 {
   font-size: 28px;
   font-weight: 700;
   margin: 0 0 8px 0;
 }
 
-.dashboard-header p {
+.vet-header p {
   margin: 0;
   opacity: 0.95;
   font-size: 16px;
 }
 
+.vet-stat {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+}
+
+.vet-appointment {
+  border-left: 5px solid #11998e !important;
+}
+
+.vet-time {
+  color: #11998e !important;
+}
+
+.patient-info {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin: 15px 0;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.pet-avatar-small {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.patient-details {
+  flex: 1;
+}
+
+.patient-details strong {
+  display: block;
+  color: #2c3e50;
+  margin-bottom: 4px;
+  font-size: 16px;
+}
+
+.patient-details p {
+  color: #999;
+  font-size: 13px;
+  margin: 0;
+}
+
+.vet-button {
+  --background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+  --border-radius: 12px;
+  height: 50px;
+  font-weight: 600;
+  margin-top: 12px;
+  text-transform: none;
+}
+
+/* Reutilizamos estilos del cliente */
 .dashboard-content {
   padding: 20px;
-  padding-bottom: 80px;
+  padding-bottom: 100px !important;
 }
 
 .stats-grid {
@@ -27,12 +88,11 @@
 }
 
 .stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 25px;
   border-radius: 15px;
   text-align: center;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
 }
 
 .stat-number {
@@ -53,54 +113,13 @@
   font-weight: 600;
 }
 
-.actions-grid {
-  padding: 0;
-  margin-bottom: 25px;
-}
-
-.action-card {
-  background: white;
-  border: 2px solid #e0e0e0;
-  border-radius: 15px;
-  padding: 25px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  height: 120px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.action-card:active {
-  transform: scale(0.95);
-}
-
-.action-card:hover {
-  border-color: #667eea;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-}
-
-.action-icon {
-  font-size: 40px;
-  margin-bottom: 10px;
-}
-
-.action-label {
-  color: #555;
-  font-weight: 600;
-  font-size: 14px;
-}
-
 .appointment-card {
-  border-left: 5px solid #667eea;
   margin-bottom: 15px;
 }
 
 .appointment-time {
-  color: #667eea;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin: 10px 0;
   font-size: 16px;
 }
 
@@ -110,50 +129,28 @@
   font-size: 18px;
 }
 
-.appointment-card p {
-  color: #666;
-  margin: 5px 0;
-}
-
 .badge {
   display: inline-block;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
-  margin-top: 8px;
   text-transform: capitalize;
 }
 
-.badge-confirmada {
+.badge-info {
   background: #d1ecf1;
   color: #0c5460;
 }
 
-.badge-pendiente {
+.badge-warning {
   background: #fff3cd;
   color: #856404;
 }
 
-.badge-completada {
+.badge-success {
   background: #d4edda;
   color: #155724;
-}
-
-.custom-tab-bar {
-  --background: white;
-  border-top: 1px solid #e0e0e0;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-.custom-tab-bar ion-tab-button {
-  --color: #999;
-  --color-selected: #667eea;
-}
-
-.custom-tab-bar ion-tab-button.active {
-  --color: #667eea;
 }
 
 /* Navegación inferior personalizada */
@@ -187,7 +184,7 @@
 }
 
 .custom-bottom-nav .nav-item.active {
-  color: #667eea;
+  color: #11998e;
 }
 
 .custom-bottom-nav .nav-icon {

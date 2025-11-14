@@ -14,7 +14,7 @@ import {
 } from '@ionic/react';
 import { useParams, useHistory } from 'react-router-dom';
 import { createOutline } from 'ionicons/icons';
-import databaseService from '../../services/database.service';
+import sqliteService from '../../services/sqlite.service';
 import './PetDetail.css';
 
 interface PetDetailParams {
@@ -27,8 +27,8 @@ const PetDetail: React.FC = () => {
   const [pet, setPet] = useState<any>(null);
 
   useEffect(() => {
-    const allPets = databaseService.getPets();
-    const foundPet = allPets.find(p => p.id === parseInt(id));
+    const allPets = sqliteService.getPets();
+    const foundPet = allPets.find(( p : any) => p.id === parseInt(id));
     setPet(foundPet);
   }, [id]);
 

@@ -11,9 +11,6 @@ import {
   IonFab,
   IonFabButton,
   IonIcon,
-  IonTabBar,
-  IonTabButton,
-  IonLabel,
   IonModal,
   IonInput,
   IonSelect,
@@ -28,8 +25,8 @@ import {
   personOutline,
   addOutline
 } from 'ionicons/icons';
-import authService from '../../services/auth.service';
-import databaseService from '../../services/database.service';
+import authService from '../../services/auth.service';;
+import sqliteService from '../../services/sqlite.service';
 import './Pets.css';
 
 const Pets: React.FC = () => {
@@ -49,57 +46,64 @@ const Pets: React.FC = () => {
   const [color, setColor] = useState('');
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    if (!currentUser) {
-      history.push('/login');
-      return;
-    }
-    setUser(currentUser);
-    loadPets(currentUser.id);
+
+    const loadData = async () => {
+
+      await sqliteService.initDB();
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        history.push('/login');
+        return;
+      }
+
+      setUser(currentUser);
+      await loadPets(currentUser.id);
+
+
+    };
+
+    loadData();
+    
   }, [history]);
 
-  const loadPets = (userId: number) => {
-    const allPets = databaseService.getPets();
-    const userPets = allPets.filter(p => p.clienteId === userId);
+  const loadPets = async (userId: number) => {
+    const allPets = await sqliteService.getPets();
+    const userPets = allPets.filter((p : any)=> p.clienteId === userId);
     setPets(userPets);
   };
 
-  const handleAddPet = () => {
-    if (!nombre || !raza || !edad || !peso) {
-      setToastMessage('Por favor completa todos los campos');
-      setShowToast(true);
-      return;
-    }
-
-    const allPets = databaseService.getPets();
-    const newPet = {
-      id: allPets.length + 1,
-      nombre,
-      especie,
-      raza,
-      edad: parseInt(edad),
-      peso: parseFloat(peso),
-      color,
-      clienteId: user.id,
-      vacunas: []
-    };
-
-    allPets.push(newPet);
-    databaseService.savePets(allPets);
-    
-    setToastMessage('¡Mascota agregada exitosamente!');
+  const handleAddPet = async () => {
+  if (!nombre || !raza || !edad || !peso) {
+    setToastMessage('Por favor completa todos los campos');
     setShowToast(true);
-    setShowModal(false);
-    
-    // Limpiar formulario
-    setNombre('');
-    setRaza('');
-    setEdad('');
-    setPeso('');
-    setColor('');
-    
-    loadPets(user.id);
+    return;
+  }
+
+  const newPet = {
+    nombre,
+    especie,
+    raza,
+    edad: parseInt(edad),
+    peso: parseFloat(peso),
+    color,
+    clienteId: user.id
   };
+
+  const newPetId = await sqliteService.addPet(newPet);
+  
+  setToastMessage('¡Mascota agregada exitosamente!');
+  setShowToast(true);
+  setShowModal(false);
+  
+  // Limpiar formulario
+  setNombre('');
+  setRaza('');
+  setEdad('');
+  setPeso('');
+  setColor('');
+  
+  await loadPets(user.id);
+};
 
   const getPetEmoji = (especie: string) => {
     return especie.toLowerCase() === 'perro' ? '🐕' : '🐈';
@@ -245,27 +249,39 @@ const Pets: React.FC = () => {
         </IonModal>
 
         {/* Navegación inferior */}
-        <IonTabBar slot="bottom" className="custom-tab-bar">
-          <IonTabButton tab="home" onClick={() => history.push('/client/dashboard')}>
-            <IonIcon icon={home} />
-            <IonLabel>Inicio</IonLabel>
-          </IonTabButton>
+        <div className="custom-bottom-nav">
+          <div 
+            className="nav-item"
+            onClick={() => history.push('/client/dashboard')}
+          >
+            <IonIcon icon={home} className="nav-icon" />
+            <span>Inicio</span>
+          </div>
 
-          <IonTabButton tab="pets" className="active">
-            <IonIcon icon={pawOutline} />
-            <IonLabel>Mascotas</IonLabel>
-          </IonTabButton>
+          <div 
+            className="nav-item active"
+            onClick={() => history.push('/client/pets')}
+          >
+            <IonIcon icon={pawOutline} className="nav-icon" />
+            <span>Mascotas</span>
+          </div>
 
-          <IonTabButton tab="appointments" onClick={() => history.push('/client/appointments')}>
-            <IonIcon icon={calendarOutline} />
-            <IonLabel>Citas</IonLabel>
-          </IonTabButton>
+          <div 
+            className="nav-item"
+            onClick={() => history.push('/client/appointments')}
+          >
+            <IonIcon icon={calendarOutline} className="nav-icon" />
+            <span>Citas</span>
+          </div>
 
-          <IonTabButton tab="profile" onClick={() => history.push('/client/profile')}>
-            <IonIcon icon={personOutline} />
-            <IonLabel>Perfil</IonLabel>
-          </IonTabButton>
-        </IonTabBar>
+          <div 
+            className="nav-item"
+            onClick={() => history.push('/client/profile')}
+          >
+            <IonIcon icon={personOutline} className="nav-icon" />
+            <span>Perfil</span>
+          </div>
+        </div>
 
         <IonToast
           isOpen={showToast}

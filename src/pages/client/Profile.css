@@ -1,8 +1,41 @@
-.pet-detail-content {
+.profile-content {
   padding: 20px;
+  padding-bottom: 80px;
 }
 
-.pet-detail-content h4 {
+.profile-header {
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.profile-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: bold;
+  margin: 0 auto 18px;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.profile-header h2 {
+  color: #2c3e50;
+  font-size: 26px;
+  margin: 0 0 8px 0;
+}
+
+.profile-header p {
+  color: #999;
+  margin: 0;
+  font-size: 16px;
+}
+
+.profile-content h4 {
   color: #2c3e50;
   margin-bottom: 15px;
   font-size: 18px;
@@ -28,39 +61,29 @@
   color: #2c3e50;
   font-weight: 600;
   font-size: 14px;
+  text-align: right;
 }
 
-.vaccine-row {
+.stats-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  justify-content: space-around;
+  padding: 10px 0;
 }
 
-.vaccine-row:last-child {
-  border-bottom: none;
+.stat-item {
+  text-align: center;
 }
 
-.consultation-row {
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+.stat-value {
+  font-size: 32px;
+  font-weight: bold;
+  color: #667eea;
+  margin-bottom: 5px;
 }
 
-.consultation-row:last-child {
-  border-bottom: none;
-}
-
-.consultation-row strong {
-  color: #2c3e50;
-  display: block;
-  margin-bottom: 4px;
-}
-
-.consultation-row p {
+.stat-label {
   color: #999;
   font-size: 14px;
-  margin: 0;
 }
 
 .edit-button {
@@ -72,17 +95,30 @@
   text-transform: none;
 }
 
-.badge {
-  display: inline-block;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 12px;
+.logout-button {
+  --border-color: #667eea;
+  --color: #667eea;
+  --border-radius: 12px;
+  --border-width: 2px;
+  height: 50px;
   font-weight: 600;
+  margin-top: 12px;
+  text-transform: none;
 }
 
-.badge-success {
-  background: #d4edda;
-  color: #155724;
+.custom-tab-bar {
+  --background: white;
+  border-top: 1px solid #e0e0e0;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.custom-tab-bar ion-tab-button {
+  --color: #999;
+  --color-selected: #667eea;
+}
+
+.custom-tab-bar ion-tab-button.active {
+  --color: #667eea;
 }
 
 /* Navegación inferior personalizada */

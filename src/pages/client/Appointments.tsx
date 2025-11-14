@@ -27,7 +27,7 @@ import {
   addOutline
 } from 'ionicons/icons';
 import authService from '../../services/auth.service';
-import databaseService from '../../services/database.service';
+import sqliteService from '../../services/sqlite.service';
 import './Appointments.css';
 
 const Appointments: React.FC = () => {
@@ -47,16 +47,16 @@ const Appointments: React.FC = () => {
     setUser(currentUser);
 
     // Cargar datos
-    const allPets = databaseService.getPets();
-    const userPets = allPets.filter(p => p.clienteId === currentUser.id);
+    const allPets = sqliteService.getPets();
+    const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
     setPets(userPets);
 
-    const allAppointments = databaseService.getAppointments();
-    const userAppointments = allAppointments.filter(a => a.clienteId === currentUser.id);
+    const allAppointments = sqliteService.getAppointments();
+    const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
     setAppointments(userAppointments);
 
-    const allUsers = databaseService.getUsers();
-    const veterinarians = allUsers.filter(u => u.tipo === 'veterinario');
+    const allUsers = sqliteService.getUsers();
+    const veterinarians = allUsers.filter((u : any)=> u.tipo === 'veterinario');
     setVets(veterinarians);
   }, [history]);
 
@@ -197,27 +197,39 @@ const Appointments: React.FC = () => {
         </IonFab>
 
         {/* Navegación inferior */}
-        <IonTabBar slot="bottom" className="custom-tab-bar">
-          <IonTabButton tab="home" onClick={() => history.push('/client/dashboard')}>
-            <IonIcon icon={home} />
-            <IonLabel>Inicio</IonLabel>
-          </IonTabButton>
+        <div className="custom-bottom-nav">
+          <div 
+            className="nav-item"
+            onClick={() => history.push('/client/dashboard')}
+          >
+            <IonIcon icon={home} className="nav-icon" />
+            <span>Inicio</span>
+          </div>
 
-          <IonTabButton tab="pets" onClick={() => history.push('/client/pets')}>
-            <IonIcon icon={pawOutline} />
-            <IonLabel>Mascotas</IonLabel>
-          </IonTabButton>
+          <div 
+            className="nav-item"
+            onClick={() => history.push('/client/pets')}
+          >
+            <IonIcon icon={pawOutline} className="nav-icon" />
+            <span>Mascotas</span>
+          </div>
 
-          <IonTabButton tab="appointments" className="active">
-            <IonIcon icon={calendarOutline} />
-            <IonLabel>Citas</IonLabel>
-          </IonTabButton>
+          <div 
+            className="nav-item active"
+            onClick={() => history.push('/client/appointments')}
+          >
+            <IonIcon icon={calendarOutline} className="nav-icon" />
+            <span>Citas</span>
+          </div>
 
-          <IonTabButton tab="profile" onClick={() => history.push('/client/profile')}>
-            <IonIcon icon={personOutline} />
-            <IonLabel>Perfil</IonLabel>
-          </IonTabButton>
-        </IonTabBar>
+          <div 
+            className="nav-item"
+            onClick={() => history.push('/client/profile')}
+          >
+            <IonIcon icon={personOutline} className="nav-icon" />
+            <span>Perfil</span>
+          </div>
+        </div>
       </IonContent>
     </IonPage>
   );

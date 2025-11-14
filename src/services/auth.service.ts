@@ -1,12 +1,11 @@
-import databaseService from './database.service';
+import sqliteService from './sqlite.service';
 
 class AuthService {
   async login(email: string, password: string) {
-    const users = databaseService.getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
+    const user = sqliteService.getUserByEmail(email);
     
-    if (user) {
-      databaseService.setCurrentUser(user);
+    if (user && user.password === password) {
+      sqliteService.setCurrentUser(user);
       return { success: true, user };
     }
     
@@ -14,32 +13,32 @@ class AuthService {
   }
 
   async register(userData: any) {
-    const users = databaseService.getUsers();
+    const existingUser = sqliteService.getUserByEmail(userData.email);
     
-    // Verificar si el email ya existe
-    if (users.find(u => u.email === userData.email)) {
+    if (existingUser) {
       return { success: false, message: 'El email ya está registrado' };
     }
 
-    // Crear nuevo usuario
-    const newUser = {
-      id: users.length + 1,
-      ...userData
-    };
+    // Crear nuevo usuario en SQLite
+    const newUserId = sqliteService.addUser(userData);
+    
+    // Obtener el usuario completo
+    const newUser = sqliteService.getUserByEmail(userData.email);
+    
+    if (newUser) {
+      sqliteService.setCurrentUser(newUser);
+      return { success: true, user: newUser };
+    }
 
-    users.push(newUser);
-    databaseService.saveUsers(users);
-    databaseService.setCurrentUser(newUser);
-
-    return { success: true, user: newUser };
+    return { success: false, message: 'Error al crear usuario' };
   }
 
   logout() {
-    databaseService.clearCurrentUser();
+    sqliteService.clearCurrentUser();
   }
 
   getCurrentUser() {
-    return databaseService.getCurrentUser();
+    return sqliteService.getCurrentUser();
   }
 
   isAuthenticated(): boolean {
