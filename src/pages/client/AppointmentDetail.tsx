@@ -26,22 +26,31 @@ const AppointmentDetail: React.FC = () => {
   const [vet, setVet] = useState<any>(null);
 
   useEffect(() => {
-    // Cargar cita
-    const allAppointments = sqliteService.getAppointments();
-    const foundAppointment = allAppointments.find((a : any) => a.id === parseInt(id));
-    setAppointment(foundAppointment);
 
-    if (foundAppointment) {
-      // Cargar mascota
-      const allPets = sqliteService.getPets();
-      const foundPet = allPets.find((p : any)=> p.id === foundAppointment.mascotaId);
-      setPet(foundPet);
+    const loadData = async () => {
 
-      // Cargar veterinario
-      const allUsers = sqliteService.getUsers();
-      const foundVet = allUsers.find((u : any) => u.id === foundAppointment.veterinarioId);
-      setVet(foundVet);
-    }
+      // Cargar cita
+      const allAppointments =await sqliteService.getAppointments();
+      const foundAppointment = allAppointments.find((a : any) => a.id === parseInt(id));
+      setAppointment(foundAppointment);
+
+      if (foundAppointment) {
+        // Cargar mascota
+        const allPets =await sqliteService.getPets();
+        const foundPet = allPets.find((p : any)=> p.id === foundAppointment.mascotaId);
+        setPet(foundPet);
+
+        // Cargar veterinario
+        const allUsers = await sqliteService.getUsers();
+        const foundVet = allUsers.find((u : any) => u.id === foundAppointment.veterinarioId);
+        setVet(foundVet);
+      }
+
+    };
+
+    loadData();
+
+  
   }, [id]);
 
   if (!appointment) {

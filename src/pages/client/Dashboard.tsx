@@ -60,6 +60,8 @@ const ClientDashboard: React.FC = () => {
       const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
       setAppointments(userAppointments);
     }
+
+    loadData();
       
   }, [history]);
 

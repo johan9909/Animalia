@@ -27,9 +27,17 @@ const PetDetail: React.FC = () => {
   const [pet, setPet] = useState<any>(null);
 
   useEffect(() => {
-    const allPets = sqliteService.getPets();
-    const foundPet = allPets.find(( p : any) => p.id === parseInt(id));
-    setPet(foundPet);
+
+    const loadData = async () => {
+      await sqliteService.initDB();
+      const allPets = await sqliteService.getPets();
+      const foundPet = allPets.find(( p : any) => p.id === parseInt(id));
+      setPet(foundPet);
+
+    };
+
+    loadData();
+    
   }, [id]);
 
   if (!pet) {

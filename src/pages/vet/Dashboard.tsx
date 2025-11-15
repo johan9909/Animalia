@@ -31,11 +31,9 @@ const VetDashboard: React.FC = () => {
 
     useEffect(() => {
     const loadDashboard = async () => {
-
-      /** 🔥 Esperar a que la DB esté lista */
+     
       await sqliteService.initDB();
 
-      /** 🔒 Validar usuario */
       const currentUser = authService.getCurrentUser();
       if (!currentUser || currentUser.tipo !== 'veterinario') {
         history.push('/login');
@@ -44,8 +42,7 @@ const VetDashboard: React.FC = () => {
 
       setUser(currentUser);
 
-      /** 📅 Citas */
-      const allAppointments = sqliteService.getAppointments();
+      const allAppointments = await sqliteService.getAppointments();
       const vetAppointments = allAppointments.filter(
         (a: any) => a.veterinarioId === currentUser.id
       );
@@ -53,25 +50,24 @@ const VetDashboard: React.FC = () => {
       const today = new Date().toISOString().split("T")[0];
       const todayAppts = vetAppointments.filter(
         (a: any) => a.fecha === today
-       // (a: any) => a.fecha === "202-11-02"
+        //(a: any) => a.fecha === "2024-11-02"
       );
 
       setTodayAppointments(todayAppts);
       //setTodayAppointments(vetAppointments);
 
-      /** 🐶 Mascotas */
-      const allPets = sqliteService.getPets();
+    
+      const allPets = await sqliteService.getPets();
       setPets(allPets);
 
-      /** 👥 Pacientes únicos */
       const uniquePetIds = [...new Set(
         vetAppointments.map((a: any) => a.mascotaId)
       )];
 
       setAllPatients(uniquePetIds);
 
-      /** 🧑‍🦰 Clientes */
-      const allUsers = sqliteService.getUsers();
+      
+      const allUsers = await sqliteService.getUsers();
       const clientUsers = allUsers.filter((u: any) => u.tipo === "cliente");
       setClients(clientUsers);
     };

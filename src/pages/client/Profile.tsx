@@ -35,21 +35,31 @@ const Profile: React.FC = () => {
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    if (!currentUser) {
-      history.push('/login');
-      return;
-    }
-    setUser(currentUser);
 
-    // Cargar estadísticas
-    const allPets = sqliteService.getPets();
-    const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
-    setPets(userPets);
+    const loadData = async () => {
 
-    const allAppointments = sqliteService.getAppointments();
-    const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
-    setAppointments(userAppointments);
+      await sqliteService.initDB();
+
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        history.push('/login');
+        return;
+      }
+      setUser(currentUser);
+
+      // Cargar estadísticas
+      const allPets = await sqliteService.getPets();
+      const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
+      setPets(userPets);
+
+      const allAppointments =await sqliteService.getAppointments();
+      const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
+      setAppointments(userAppointments);
+
+    };
+
+    loadData();
+    
   }, [history]);
 
   const handleLogout = () => {

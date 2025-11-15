@@ -39,25 +39,35 @@ const Appointments: React.FC = () => {
   const [filter, setFilter] = useState<'proximas' | 'historial'>('proximas');
 
   useEffect(() => {
-    const currentUser = authService.getCurrentUser();
-    if (!currentUser) {
-      history.push('/login');
-      return;
-    }
-    setUser(currentUser);
 
-    // Cargar datos
-    const allPets = sqliteService.getPets();
-    const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
-    setPets(userPets);
+    const loadData = async () => {
 
-    const allAppointments = sqliteService.getAppointments();
-    const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
-    setAppointments(userAppointments);
+      await sqliteService.initDB();
 
-    const allUsers = sqliteService.getUsers();
-    const veterinarians = allUsers.filter((u : any)=> u.tipo === 'veterinario');
-    setVets(veterinarians);
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        history.push('/login');
+        return;
+      }
+      setUser(currentUser);
+
+      // Cargar datos
+      const allPets = await sqliteService.getPets();
+      const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
+      setPets(userPets);
+
+      const allAppointments = await sqliteService.getAppointments();
+      const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
+      setAppointments(userAppointments);
+
+      const allUsers = await sqliteService.getUsers();
+      const veterinarians = allUsers.filter((u : any)=> u.tipo === 'veterinario');
+      setVets(veterinarians);
+
+    };
+
+    loadData();
+      
   }, [history]);
 
   const getFilteredAppointments = () => {

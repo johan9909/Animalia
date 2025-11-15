@@ -48,16 +48,16 @@ const Schedule: React.FC = () => {
       setUser(currentUser);
 
         // Cargar citas del veterinario
-        const allAppointments = sqliteService.getAppointments();
+        const allAppointments = await sqliteService.getAppointments();
         const vetAppointments = allAppointments.filter((a : any) => a.veterinarioId === currentUser.id);
         setAppointments(vetAppointments);
 
         // Cargar mascotas
-        const allPets = sqliteService.getPets();
+        const allPets = await sqliteService.getPets();
         setPets(allPets);
 
         // Cargar clientes
-        const allUsers = sqliteService.getUsers();
+        const allUsers = await sqliteService.getUsers();
         const clientUsers = allUsers.filter((u : any) => u.tipo === 'cliente');
         setClients(clientUsers);
       
