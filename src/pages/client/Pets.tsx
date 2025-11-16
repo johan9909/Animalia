@@ -49,7 +49,6 @@ const Pets: React.FC = () => {
 
     const loadData = async () => {
 
-      await sqliteService.initDB();
       const currentUser = authService.getCurrentUser();
       if (!currentUser) {
         history.push('/login');

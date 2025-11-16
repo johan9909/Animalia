@@ -8,12 +8,8 @@ import {
   IonRow,
   IonCol,
   IonText,
-  IonFab,
-  IonFabButton,
   IonIcon,
-  IonTabBar,
-  IonTabButton,
-  IonLabel
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -36,34 +32,37 @@ const ClientDashboard: React.FC = () => {
   const [pets, setPets] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
 
-  useEffect(() => {
-
-    const loadData = async () => {
-
-      await sqliteService.initDB();
-
-      const currentUser = await authService.getCurrentUser();
-      if (!currentUser || currentUser.tipo !== 'cliente') {
-        history.push('/login');
-        return;
-      }
-
-      setUser(currentUser);
-
-      // Cargar mascotas del usuario
-      const allPets = await sqliteService.getPets();
-      const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
-      setPets(userPets);
-
-      // Cargar citas del usuario
-      const allAppointments = await sqliteService.getAppointments();
-      const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
-      setAppointments(userAppointments);
+    // Función para cargar datos
+  const loadData = async () => {
+    const currentUser = authService.getCurrentUser();
+    if (!currentUser || currentUser.tipo !== 'cliente') {
+      history.push('/login');
+      return;
     }
 
+    setUser(currentUser);
+
+    // Cargar mascotas del usuario
+    const allPets = await sqliteService.getPets();
+    const userPets = allPets.filter((p: any) => p.clienteId === currentUser.id);
+    setPets(userPets);
+
+    // Cargar citas del usuario
+    const allAppointments = await sqliteService.getAppointments();
+    const userAppointments = allAppointments.filter((a: any) => a.clienteId === currentUser.id);
+    setAppointments(userAppointments);
+  };
+
+  // useEffect para carga inicial
+  useEffect(() => {
     loadData();
-      
   }, [history]);
+
+  // useIonViewWillEnter se ejecuta cada vez que la vista está por entrar
+  // Esto recarga los datos cuando vuelves desde otra página
+  useIonViewWillEnter(() => {
+    loadData();
+  });
 
   return (
     <IonPage>

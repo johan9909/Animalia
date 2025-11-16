@@ -32,8 +32,6 @@ const VetDashboard: React.FC = () => {
     useEffect(() => {
     const loadDashboard = async () => {
      
-      await sqliteService.initDB();
-
       const currentUser = authService.getCurrentUser();
       if (!currentUser || currentUser.tipo !== 'veterinario') {
         history.push('/login');
