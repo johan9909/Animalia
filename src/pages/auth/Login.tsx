@@ -21,25 +21,42 @@ const Login: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    // Trim para eliminar espacios en blanco
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    console.log('Email:', trimmedEmail);
+    console.log('Password:', trimmedPassword);
+
+    if (!trimmedEmail || !trimmedPassword) {
       setToastMessage('Por favor completa todos los campos');
       setShowToast(true);
       return;
     }
 
     setLoading(true);
-    const result = await authService.login(email, password);
-    setLoading(false);
+    
+    try {
+      const result = await authService.login(trimmedEmail, trimmedPassword);
+      console.log('Login result:', result);
+      
+      setLoading(false);
 
-    if (result.success) {
-      // Redirigir según el tipo de usuario
-      if (result.user.tipo === 'cliente') {
-        history.push('/client/dashboard');
+      if (result.success) {
+        // Redirigir según el tipo de usuario
+        if (result.user.tipo === 'cliente') {
+          history.push('/client/dashboard');
+        } else {
+          history.push('/vet/dashboard');
+        }
       } else {
-        history.push('/vet/dashboard');
+        setToastMessage(result.message || 'Error al iniciar sesión');
+        setShowToast(true);
       }
-    } else {
-      setToastMessage(result.message || 'Error al iniciar sesión');
+    } catch (error) {
+      console.error('Error en login:', error);
+      setLoading(false);
+      setToastMessage('Error al procesar el inicio de sesión');
       setShowToast(true);
     }
   };
@@ -65,7 +82,7 @@ const Login: React.FC = () => {
                 type="email"
                 placeholder="tu@email.com"
                 value={email}
-                onIonChange={e => setEmail(e.detail.value!)}
+                onIonInput={e => setEmail(e.detail.value || '')}
               />
             </div>
 
@@ -75,7 +92,12 @@ const Login: React.FC = () => {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onIonChange={e => setPassword(e.detail.value!)}
+                onIonInput={e => setPassword(e.detail.value || '')}
+                onKeyPress={e => {
+                  if (e.key === 'Enter') {
+                    handleLogin();
+                  }
+                }}
               />
             </div>
 

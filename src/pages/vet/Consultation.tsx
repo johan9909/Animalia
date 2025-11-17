@@ -15,7 +15,8 @@ import {
   IonSelectOption,
   IonButton,
   IonToast,
-  IonLoading
+  IonLoading,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useParams, useHistory } from 'react-router-dom';
 import sqliteService from '../../services/sqlite.service';
@@ -45,10 +46,8 @@ const Consultation: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    // Cargar cita
-
-    const loadData = async () => {
+ 
+     const loadData = async () => {
 
       await sqliteService.initDB();
 
@@ -81,10 +80,11 @@ const Consultation: React.FC = () => {
       }
 
     };
+ 
 
-    loadData();
-
-  }, [id]);
+    useIonViewWillEnter(() => {
+        loadData();
+    });
 
   const handleSaveConsultation = () => {
     if (!diagnostico || !tratamiento) {
@@ -118,13 +118,13 @@ const Consultation: React.FC = () => {
     setToastMessage('¡Consulta guardada exitosamente!');
     setShowToast(true);
 
-    /*setTimeout(() => {
-      history.push('/vet/dashboard');
-    }, 1500);*/
-
     setTimeout(() => {
-        window.location.href = '/vet/dashboard';
+      history.push('/vet/dashboard');
     }, 1500);
+
+   /* setTimeout(() => {
+        window.location.href = '/vet/dashboard';
+    }, 1500);*/
   };
 
   const getPetEmoji = (especie: string) => {
