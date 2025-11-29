@@ -109,13 +109,13 @@ const ClientDashboard: React.FC = () => {
                 </div>
               </IonCol>
               <IonCol size="6">
-                <div className="action-card" onClick={() => alert('Función en desarrollo')}>
+                <div className="action-card" onClick={() => history.push('/client/vaccine-selector')}>
                   <div className="action-icon">💉</div>
                   <div className="action-label">Vacunas</div>
                 </div>
               </IonCol>
               <IonCol size="6">
-                <div className="action-card" onClick={() => alert('Función en desarrollo')}>
+                <div className="action-card" onClick={() => history.push('/client/appointment-history')}>
                   <div className="action-icon">📋</div>
                   <div className="action-label">Historial</div>
                 </div>

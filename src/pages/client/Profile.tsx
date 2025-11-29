@@ -12,7 +12,10 @@ import {
   IonTabButton,
   IonLabel,
   IonIcon,
-  IonAlert
+  IonAlert,
+  IonModal,
+  IonInput,
+  IonToast
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -34,6 +37,17 @@ const Profile: React.FC = () => {
   const [appointments, setAppointments] = useState<any[]>([]);
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
 
+  // Estados del modal
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  // Estados del formulario de edición
+  const [nombre, setNombre] = useState('');
+  const [email, setEmail] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [direccion, setDireccion] = useState('');
+
   useEffect(() => {
 
     const loadData = async () => {
@@ -52,7 +66,7 @@ const Profile: React.FC = () => {
       const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
       setPets(userPets);
 
-      const allAppointments =await sqliteService.getAppointments();
+      const allAppointments = await sqliteService.getAppointments();
       const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
       setAppointments(userAppointments);
 
@@ -61,6 +75,56 @@ const Profile: React.FC = () => {
     loadData();
     
   }, [history]);
+
+  const handleEditClick = () => {
+    // Cargar datos actuales en el formulario
+    setNombre(user.nombre);
+    setEmail(user.email);
+    setTelefono(user.telefono || '');
+    setDireccion(user.direccion || '');
+    setShowEditModal(true);
+  };
+
+  const handleUpdateProfile = async () => {
+    if (!nombre || !email) {
+      setToastMessage('Nombre y correo son obligatorios');
+      setShowToast(true);
+      return;
+    }
+
+    // Validar formato de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setToastMessage('Por favor ingresa un correo válido');
+      setShowToast(true);
+      return;
+    }
+
+    const updatedUser = {
+      ...user,
+      nombre,
+      email,
+      telefono: telefono || null,
+      direccion: direccion || null
+    };
+
+    try {
+      await sqliteService.updateUser(user.id, updatedUser);
+      
+      // Actualizar el usuario en localStorage
+      authService.updateCurrentUser(updatedUser);
+      
+      // Actualizar estado local
+      setUser(updatedUser);
+      
+      setToastMessage('¡Perfil actualizado exitosamente!');
+      setShowToast(true);
+      setShowEditModal(false);
+    } catch (error) {
+      setToastMessage('Error al actualizar el perfil');
+      setShowToast(true);
+    }
+  };
 
   const handleLogout = () => {
     authService.logout();
@@ -135,7 +199,7 @@ const Profile: React.FC = () => {
           <IonButton 
             expand="block" 
             className="edit-button"
-            onClick={() => alert('Función de editar perfil en desarrollo')}
+            onClick={handleEditClick}
           >
             <IonIcon icon={createOutline} slot="start" />
             Editar Perfil
@@ -187,6 +251,68 @@ const Profile: React.FC = () => {
           </div>
         </div>
 
+        {/* Modal para editar perfil */}
+        <IonModal isOpen={showEditModal} onDidDismiss={() => setShowEditModal(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Editar Perfil</IonTitle>
+              <IonButton slot="end" fill="clear" onClick={() => setShowEditModal(false)}>
+                Cerrar
+              </IonButton>
+            </IonToolbar>
+          </IonHeader>
+          <IonContent className="modal-content">
+            <div style={{ padding: '20px' }}>
+              
+              <div className="input-group">
+                <label>Nombre *</label>
+                <IonInput
+                  value={nombre}
+                  placeholder="Juan Pérez"
+                  onIonChange={e => setNombre(e.detail.value!)}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Correo Electrónico *</label>
+                <IonInput
+                  type="email"
+                  value={email}
+                  placeholder="correo@ejemplo.com"
+                  onIonChange={e => setEmail(e.detail.value!)}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Teléfono</label>
+                <IonInput
+                  type="tel"
+                  value={telefono}
+                  placeholder="+57 300 123 4567"
+                  onIonChange={e => setTelefono(e.detail.value!)}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Dirección</label>
+                <IonInput
+                  value={direccion}
+                  placeholder="Calle 100 #15-20, Bogotá"
+                  onIonChange={e => setDireccion(e.detail.value!)}
+                />
+              </div>
+
+              <IonButton 
+                expand="block" 
+                onClick={handleUpdateProfile}
+                style={{ marginTop: '20px' }}
+              >
+                Guardar Cambios
+              </IonButton>
+            </div>
+          </IonContent>
+        </IonModal>
+
         {/* Alert de confirmación de logout */}
         <IonAlert
           isOpen={showLogoutAlert}
@@ -203,6 +329,13 @@ const Profile: React.FC = () => {
               handler: handleLogout
             }
           ]}
+        />
+
+        <IonToast
+          isOpen={showToast}
+          onDidDismiss={() => setShowToast(false)}
+          message={toastMessage}
+          duration={2000}
         />
       </IonContent>
     </IonPage>

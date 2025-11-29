@@ -12,6 +12,10 @@ import PetDetail from './pages/client/PetDetail';
 import Appointments from './pages/client/Appointments';
 import AppointmentDetail from './pages/client/AppointmentDetail';
 import Profile from './pages/client/Profile';
+import VaccineHistory from './pages/client/VaccineHistory';
+import VaccineSelector from './pages/client/VaccineSelector';
+import AppointmentHistory from './pages/client/AppointmentHistory';
+
 
 /* Path de las rutas para el veterinario */
 import VetDashboard from './pages/vet/Dashboard';
@@ -68,7 +72,10 @@ const App: React.FC = () => {
           <Route exact path="/client/appointments" component={Appointments} />
           <Route exact path="/client/appointment-detail/:id" component={AppointmentDetail} />
           <Route exact path="/client/profile" component={Profile} />
-
+          <Route exact path="/client/VaccineHistory/:petId" component={VaccineHistory} />
+          <Route exact path="/client/vaccine-selector" component={VaccineSelector} />
+          <Route exact path="/client/appointment-history" component={AppointmentHistory} />
+         
           {/*componentes del veterinario*/}
            <Route exact path="/vet/dashboard" component={VetDashboard} />
            <Route exact path="/vet/schedule" component={Schedule} />

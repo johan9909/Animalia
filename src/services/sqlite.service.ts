@@ -246,12 +246,97 @@ class SQLiteService {
     return result[0].values[0][0];
   }
 
-  updatePet(id: number, pet: any) {
+  addAppointment(appointment: any) {
+    
+    this.db.run(
+      `INSERT INTO appointments 
+        (fecha, horaInicio, horaFin, mascotaId, clienteId, veterinarioId, servicio, precio, estado,sintomas) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?,?)`,
+      [
+        appointment.fecha,
+        appointment.horaInicio,
+        appointment.horaFin,
+        appointment.mascotaId,
+        appointment.clienteId,
+        appointment.veterinarioId,
+        appointment.servicio,
+        appointment.precio || null,
+        appointment.estado || 'pendiente',
+        appointment.sintomas 
+      ]
+    );
+
+    this.saveDB();
+
+
+    const result = this.db.exec('SELECT last_insert_rowid() as id');
+    return result[0].values[0][0];
+  }
+
+
+  
+
+  addVaccine(vaccine: any) {
+    this.db.run(
+      `INSERT INTO vaccines (petId, nombre, fecha) VALUES (?, ?, ?)`,
+      [vaccine.petId, vaccine.nombre, vaccine.fecha]
+    );
+    this.saveDB();
+    
+    const result = this.db.exec('SELECT last_insert_rowid() as id');
+    return result[0].values[0][0];
+  }
+
+  deleteVaccine(id: number) {
+    this.db.run(
+      `DELETE FROM vaccines WHERE id = ?`,
+      [id]
+    );
+    this.saveDB();
+  }
+
+  updateUser(id: number, user: any) {
+  this.db.run(
+    `UPDATE users 
+     SET nombre = ?, email = ?, telefono = ?, direccion = ?
+     WHERE id = ?`,
+    [
+      user.nombre,
+      user.email,
+      user.telefono || null,
+      user.direccion || null,
+      id
+    ]
+  );
+  this.saveDB();
+  }
+
+  /*updatePet(id: number, pet: any) {
     this.db.run(
       `UPDATE pets SET peso = ? WHERE id = ?`,
       [pet.peso, id]
     );
     this.saveDB();
+  }*/
+
+  updatePet(id: number, pet: any) {
+
+    this.db.run(
+      `UPDATE pets 
+      SET nombre = ?, especie = ?, raza = ?, edad = ?, peso = ?, color = ?
+      WHERE id = ?`,
+      [
+        pet.nombre,
+        pet.especie,
+        pet.raza,
+        pet.edad,
+        pet.peso,
+        pet.color || null,
+        id
+      ]
+    );
+    this.saveDB();
+
   }
 
   // APPOINTMENTS
@@ -264,7 +349,7 @@ class SQLiteService {
   updateAppointment(id: number, appointment: any) {
     this.db.run(
       `UPDATE appointments 
-       SET diagnostico = ?, tratamiento = ?, sintomas = ?, temperatura = ?, pesoActual = ?, estado = ?
+       SET diagnostico = ?, tratamiento = ?, sintomas = ?, temperatura = ?, pesoActual = ?, estado = ?,  
        WHERE id = ?`,
       [
         appointment.diagnostico || null,
@@ -278,6 +363,41 @@ class SQLiteService {
     );
     this.saveDB();
   }
+
+   updateAppointmenClient(id: number, appointment: any) {
+    this.db.run(
+      `UPDATE appointments 
+       SET fecha = ?, horaInicio = ?, horaFin = ?, mascotaId = ?, veterinarioId = ?, servicio =?,  sintomas = ?,  estado = ?
+       WHERE id = ?`,
+      [
+        appointment.fecha,
+        appointment.horaInicio,
+        appointment.horaFin,
+        appointment.mascotaId,
+        appointment.veterinarioId,
+        appointment.servicio,
+        appointment.sintomas || null,
+        appointment.estado || null,
+        id
+      ]
+    );
+    this.saveDB();
+  }
+
+
+   cancelAppointment(id: number, appointment: any) {
+    this.db.run(
+      `UPDATE appointments 
+       SET  estado = ?
+       WHERE id = ?`,
+      [ 
+        appointment.estado || null,
+        id
+      ]
+    );
+    this.saveDB();
+  }
+    
 
   // Convertir filas SQL a objetos JavaScript
   private rowsToObjects(result: any) {

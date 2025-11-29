@@ -11,12 +11,15 @@ import {
   IonSegment,
   IonSegmentButton,
   IonLabel,
-  IonTabBar,
-  IonTabButton,
-  IonIcon,
   IonFab,
   IonFabButton,
-  IonText
+  IonIcon,
+  IonModal,
+  IonSelect,
+  IonSelectOption,
+  IonToast,
+  IonDatetime,
+  IonTextarea
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -28,6 +31,7 @@ import {
 } from 'ionicons/icons';
 import authService from '../../services/auth.service';
 import sqliteService from '../../services/sqlite.service';
+import { useIonViewWillEnter } from '@ionic/react';
 import './Appointments.css';
 
 const Appointments: React.FC = () => {
@@ -38,10 +42,23 @@ const Appointments: React.FC = () => {
   const [vets, setVets] = useState<any[]>([]);
   const [filter, setFilter] = useState<'proximas' | 'historial'>('proximas');
 
-  useEffect(() => {
+  // Modal
+  const [showModal, setShowModal] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
+  // Formulario
+  const [fecha, setFecha] = useState('');
+  const [horaInicio, setHoraInicio] = useState('');
+  const [horaFin, setHoraFin] = useState('');
+  const [mascotaId, setMascotaId] = useState('');
+  const [veterinarioId, setVeterinarioId] = useState('');
+  const [servicio, setServicio] = useState('');
+  const [precio, setPrecio] = useState('');
+  const [sintomas, setSintomas] = useState('');
+
+  useIonViewWillEnter(() => {
     const loadData = async () => {
-
       await sqliteService.initDB();
 
       const currentUser = authService.getCurrentUser();
@@ -51,24 +68,90 @@ const Appointments: React.FC = () => {
       }
       setUser(currentUser);
 
-      // Cargar datos
       const allPets = await sqliteService.getPets();
-      const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
-      setPets(userPets);
+      setPets(allPets.filter((p: any) => p.clienteId === currentUser.id));
 
       const allAppointments = await sqliteService.getAppointments();
-      const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
-      setAppointments(userAppointments);
+      setAppointments(allAppointments.filter((a: any) => a.clienteId === currentUser.id));
 
       const allUsers = await sqliteService.getUsers();
-      const veterinarians = allUsers.filter((u : any)=> u.tipo === 'veterinario');
-      setVets(veterinarians);
-
+      setVets(allUsers.filter((u: any) => u.tipo === 'veterinario'));
     };
 
     loadData();
-      
-  }, [history]);
+  });
+
+  const loadAppointments = async (userId: number) => {
+    const allAppointments = await sqliteService.getAppointments();
+    setAppointments(allAppointments.filter((a: any) => a.clienteId === userId));
+  };
+
+  const handleCancelAppointment = async (appointmentId: number) => {
+    const confirmCancel = window.confirm('¿Estás seguro de que deseas cancelar esta cita?');
+
+    if (confirmCancel) {
+      try {
+        await sqliteService.cancelAppointment(appointmentId, { estado: 'cancelada' });
+
+        setToastMessage('Cita cancelada exitosamente');
+        setShowToast(true);
+
+        await loadAppointments(user.id);
+      } catch (error) {
+        setToastMessage('Error al cancelar la cita');
+        setShowToast(true);
+      }
+    }
+  };
+
+  const handleAddAppointment = async () => {
+    if (pets.length === 0) {
+      setToastMessage('Primero debes registrar una mascota');
+      setShowToast(true);
+      return;
+    }
+
+    const fechaFormateada = fecha.split('T')[0];
+
+    const newAppointment = {
+      fecha: fechaFormateada,
+      horaInicio,
+      horaFin,
+      mascotaId: parseInt(mascotaId),
+      clienteId: user.id,
+      veterinarioId: parseInt(veterinarioId),
+      servicio,
+      precio: precio ? parseFloat(precio) : null,
+      estado: 'pendiente',
+      diagnostico: null,
+      tratamiento: null,
+      sintomas: sintomas || null,
+      temperatura: null,
+      pesoActual: null
+    };
+
+    try {
+      await sqliteService.addAppointment(newAppointment);
+
+      setToastMessage('¡Cita agendada exitosamente!');
+      setShowToast(true);
+      setShowModal(false);
+
+      setFecha('');
+      setHoraInicio('');
+      setHoraFin('');
+      setMascotaId('');
+      setVeterinarioId('');
+      setServicio('');
+      setPrecio('');
+      setSintomas('');
+
+      await loadAppointments(user.id);
+    } catch {
+      setToastMessage('Error al agendar la cita');
+      setShowToast(true);
+    }
+  };
 
   const getFilteredAppointments = () => {
     const today = new Date();
@@ -124,7 +207,7 @@ const Appointments: React.FC = () => {
 
       <IonContent>
         <div className="appointments-content">
-          {/* Filtros */}
+          
           <IonSegment value={filter} onIonChange={e => setFilter(e.detail.value as any)}>
             <IonSegmentButton value="proximas">
               <IonLabel>Próximas</IonLabel>
@@ -134,21 +217,26 @@ const Appointments: React.FC = () => {
             </IonSegmentButton>
           </IonSegment>
 
-          {/* Lista de citas */}
           {filteredAppointments.length > 0 ? (
             filteredAppointments.map(appointment => (
               <IonCard 
                 key={appointment.id} 
                 className="appointment-card"
-                onClick={() => history.push(`/client/appointment-detail/${appointment.id}`)}
+                onClick={() => {
+                  if (filter === 'proximas') {
+                    history.push(`/client/appointment-detail/${appointment.id}`);
+                  }
+                }}
               >
                 <IonCardContent>
                   <span className={`badge ${getBadgeClass(appointment.estado)}`}>
                     {appointment.estado}
                   </span>
+
                   <div className="appointment-time">
                     🕐 {appointment.fecha} - {appointment.horaInicio}
                   </div>
+
                   <h4>{appointment.servicio}</h4>
                   <p className="pet-name">{getPetName(appointment.mascotaId)}</p>
                   
@@ -162,27 +250,30 @@ const Appointments: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="appointment-actions">
-                    <IonButton 
-                      fill="outline" 
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        alert('Función de cancelar en desarrollo');
-                      }}
-                    >
-                      Cancelar
-                    </IonButton>
-                    <IonButton 
-                      size="small"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        history.push(`/client/appointment-detail/${appointment.id}`);
-                      }}
-                    >
-                      Ver Detalles
-                    </IonButton>
-                  </div>
+                  {filter === 'proximas' && (
+                    <div className="appointment-actions">
+                      <IonButton 
+                        fill="outline" 
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCancelAppointment(appointment.id);
+                        }}
+                      >
+                        Cancelar
+                      </IonButton>
+
+                      <IonButton 
+                        size="small"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          history.push(`/client/appointment-detail/${appointment.id}`);
+                        }}
+                      >
+                        Ver Detalles
+                      </IonButton>
+                    </div>
+                  )}
                 </IonCardContent>
               </IonCard>
             ))
@@ -199,14 +290,143 @@ const Appointments: React.FC = () => {
           )}
         </div>
 
-        {/* Botón flotante para agendar cita */}
         <IonFab vertical="bottom" horizontal="end" slot="fixed">
-          <IonFabButton onClick={() => alert('Función de agendar cita en desarrollo')}>
+          <IonFabButton onClick={() => setShowModal(true)}>
             <IonIcon icon={addOutline} />
           </IonFabButton>
         </IonFab>
 
-        {/* Navegación inferior */}
+        {/* MODAL */}
+        <IonModal isOpen={showModal} onDidDismiss={() => setShowModal(false)}>
+          <IonHeader>
+            <IonToolbar>
+              <IonTitle>Agendar Cita</IonTitle>
+              <IonButton slot="end" fill="clear" onClick={() => setShowModal(false)}>
+                Cerrar
+              </IonButton>
+            </IonToolbar>
+          </IonHeader>
+
+          <IonContent className="modal-content">
+            <div style={{ padding: '20px' }}>
+
+              <div className="input-group">
+                <label>Mascota *</label>
+                <IonSelect
+                  value={mascotaId}
+                  placeholder="Selecciona una mascota"
+                  onIonChange={e => setMascotaId(e.detail.value)}
+                >
+                  {pets.length > 0 ? (
+                    pets.map(pet => (
+                      <IonSelectOption key={pet.id} value={pet.id.toString()}>
+                        {pet.nombre} - {pet.raza}
+                      </IonSelectOption>
+                    ))
+                  ) : (
+                    <IonSelectOption value="">No tienes mascotas registradas</IonSelectOption>
+                  )}
+                </IonSelect>
+              </div>
+
+              <div className="input-group">
+                <label>Veterinario *</label>
+                <IonSelect
+                  value={veterinarioId}
+                  placeholder="Selecciona un veterinario"
+                  onIonChange={e => setVeterinarioId(e.detail.value)}
+                >
+                  {vets.map(vet => (
+                    <IonSelectOption key={vet.id} value={vet.id.toString()}>
+                      {vet.nombre}
+                    </IonSelectOption>
+                  ))}
+                </IonSelect>
+              </div>
+
+              <div className="input-group">
+                <label>Servicio *</label>
+                <IonSelect
+                  value={servicio}
+                  placeholder="Selecciona un servicio"
+                  onIonChange={e => setServicio(e.detail.value)}
+                >
+                  <IonSelectOption value="Consulta General">Consulta General</IonSelectOption>
+                  <IonSelectOption value="Vacunación">Vacunación</IonSelectOption>
+                  <IonSelectOption value="Desparasitación">Desparasitación</IonSelectOption>
+                  <IonSelectOption value="Cirugía">Cirugía</IonSelectOption>
+                  <IonSelectOption value="Control">Control</IonSelectOption>
+                  <IonSelectOption value="Emergencia">Emergencia</IonSelectOption>
+                  <IonSelectOption value="Baño y Peluquería">Baño y Peluquería</IonSelectOption>
+                </IonSelect>
+              </div>
+
+              <div className="input-group">
+                <label>Fecha *</label>
+                <IonDatetime
+                  value={fecha}
+                  onIonChange={e => setFecha(e.detail.value as string)}
+                  presentation="date"
+                  min={new Date().toISOString()}
+                />
+              </div>
+
+              <div className="input-group">
+                <label>Hora de Inicio *</label>
+                 <IonDatetime
+                  value={horaInicio}
+                  presentation="time"
+                  onIonChange={e => {
+                  const raw = e.target.value as string; // Más confiable que e.detail.value
+                  if (!raw) return;
+                
+                    // IonDatetime puede devolver "HH:mm" o "YYYY-MM-DDTHH:mm:ss"
+                    const time = raw.length > 5 ? raw.split("T")[1].substring(0, 5) : raw;
+                
+                    setHoraInicio(time);
+                    }}
+                  />
+              </div>
+
+              <div className="input-group">
+                <label>Hora de Fin *</label>
+                 <IonDatetime
+                    value={horaFin}
+                    presentation="time"
+                    onIonChange={e => {
+                    const raw = e.target.value as string; // Siempre funciona
+                    if (!raw) return;
+                
+                      // IonDatetime devuelve "HH:mm" en presentation="time"
+                      const time = raw.length > 5 ? raw.split("T")[1].substring(0, 5) : raw;
+                
+                      setHoraFin(time);
+                    }}
+                  />
+              </div>
+
+              <div className="input-group">
+                <label>Síntomas (opcional)</label>
+                <IonTextarea
+                  value={sintomas}
+                  placeholder="Describe los síntomas de tu mascota..."
+                  rows={3}
+                  //onIonChange={e => setSintomas(e.detail.value!)}
+                   onIonChange={(e) => setSintomas(e.target.value as string)}
+                />
+              </div>
+
+              <IonButton 
+                expand="block" 
+                onClick={handleAddAppointment}
+                style={{ marginTop: '20px' }}
+              >
+                Agendar Cita
+              </IonButton>
+            </div>
+          </IonContent>
+        </IonModal>
+
         <div className="custom-bottom-nav">
           <div 
             className="nav-item"
@@ -240,6 +460,13 @@ const Appointments: React.FC = () => {
             <span>Perfil</span>
           </div>
         </div>
+
+        <IonToast
+          isOpen={showToast}
+          onDidDismiss={() => setShowToast(false)}
+          message={toastMessage}
+          duration={2000}
+        />
       </IonContent>
     </IonPage>
   );

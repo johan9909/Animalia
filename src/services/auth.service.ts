@@ -44,6 +44,10 @@ class AuthService {
   isAuthenticated(): boolean {
     return this.getCurrentUser() !== null;
   }
+
+  updateCurrentUser(user: any) {
+    sqliteService.setCurrentUser(user);
+  }
 }
 
 export default new AuthService();
