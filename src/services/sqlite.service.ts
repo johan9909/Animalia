@@ -295,7 +295,7 @@ class SQLiteService {
     this.saveDB();
   }
 
-  updateUser(id: number, user: any) {
+ /* updateUser(id: number, user: any) {
   this.db.run(
     `UPDATE users 
      SET nombre = ?, email = ?, telefono = ?, direccion = ?
@@ -309,7 +309,36 @@ class SQLiteService {
     ]
   );
   this.saveDB();
-  }
+  }*/
+
+  // Reemplaza tu método updateUser en sqlite.service.ts con este:
+
+updateUser(id: number, user: any) {
+  this.db.run(
+    `UPDATE users 
+     SET nombre = ?, 
+         email = ?, 
+         telefono = ?, 
+         direccion = ?, 
+         especialidad = ?, 
+         licencia = ?, 
+         experiencia = ?, 
+         horario = ?
+     WHERE id = ?`,
+    [
+      user.nombre,
+      user.email,
+      user.telefono || null,
+      user.direccion || null,
+      user.especialidad || null,
+      user.licencia || null,
+      user.experiencia || null,
+      user.horario || null,
+      id
+    ]
+  );
+  this.saveDB();
+}
 
   /*updatePet(id: number, pet: any) {
     this.db.run(

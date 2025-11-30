@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   IonContent,
   IonPage,
@@ -13,7 +13,8 @@ import {
   IonLabel,
   IonTabBar,
   IonTabButton,
-  IonIcon
+  IonIcon,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -34,11 +35,14 @@ const Schedule: React.FC = () => {
   const [clients, setClients] = useState<any[]>([]);
   const [selectedDay, setSelectedDay] = useState<string>('hoy');
 
-  useEffect(() => {
-      
-     const loadData = async () => {
-
-      await sqliteService.initDB();
+  useIonViewWillEnter(() => {
+    const loadData = async () => {
+      // Limpiar estados primero
+      setUser(null);
+      setAppointments([]);
+      setPets([]);
+      setClients([]);
+      setSelectedDay('hoy');
 
       const currentUser = authService.getCurrentUser();
       if (!currentUser || currentUser.tipo !== 'veterinario') {
@@ -47,25 +51,23 @@ const Schedule: React.FC = () => {
       }
       setUser(currentUser);
 
-        // Cargar citas del veterinario
-        const allAppointments = await sqliteService.getAppointments();
-        const vetAppointments = allAppointments.filter((a : any) => a.veterinarioId === currentUser.id);
-        setAppointments(vetAppointments);
+      // Cargar citas del veterinario
+      const allAppointments = await sqliteService.getAppointments();
+      const vetAppointments = allAppointments.filter((a: any) => a.veterinarioId === currentUser.id);
+      setAppointments(vetAppointments);
 
-        // Cargar mascotas
-        const allPets = await sqliteService.getPets();
-        setPets(allPets);
+      // Cargar mascotas
+      const allPets = await sqliteService.getPets();
+      setPets(allPets);
 
-        // Cargar clientes
-        const allUsers = await sqliteService.getUsers();
-        const clientUsers = allUsers.filter((u : any) => u.tipo === 'cliente');
-        setClients(clientUsers);
-      
-     };
+      // Cargar clientes
+      const allUsers = await sqliteService.getUsers();
+      const clientUsers = allUsers.filter((u: any) => u.tipo === 'cliente');
+      setClients(clientUsers);
+    };
      
-     loadData();
-    
-  }, [history]);
+    loadData();
+  });
 
   // Función para obtener la fecha según el día seleccionado
   const getDateForDay = (day: string): string => {
@@ -274,14 +276,14 @@ const Schedule: React.FC = () => {
                 
                 return (
                   <IonCard 
-                    /*key={appointment.id} 
+                    key={appointment.id} 
                     className={`schedule-card ${getCardStyle(appointment.estado)}`}
-                    onClick={() => history.push(`/vet/consultation/${appointment.id}`)}*/
+                    onClick={() => history.push(`/vet/consultation/${appointment.id}`)}
                   >
                     <IonCardContent>
                       <div className="schedule-header">
                         <div className="schedule-time">
-                          {appointment.fecha}
+                          {appointment.horaInicio} - {appointment.horaFin}
                         </div>
                         <span className={`badge ${getBadgeClass(appointment.estado)}`}>
                           {getStatusText(appointment.estado)}

@@ -12,7 +12,8 @@ import {
   IonToolbar,
   IonTitle,
   IonButtons,
-  IonBackButton
+  IonBackButton,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import authService from '../../services/auth.service';
@@ -29,6 +30,15 @@ const Register: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastColor, setToastColor] = useState<'danger' | 'success'>('danger');
+
+  // Limpiar campos cada vez que se entra a la vista
+  useIonViewWillEnter(() => {
+    setNombre('');
+    setEmail('');
+    setTelefono('');
+    setPassword('');
+    setTipo('cliente');
+  });
 
   const handleRegister = async () => {
     if (!nombre || !email || !telefono || !password) {
@@ -87,7 +97,7 @@ const Register: React.FC = () => {
               <label>Nombre completo</label>
               <IonInput
                 type="text"
-                placeholder="Juan Pérez"
+                //placeholder="Juan Pérez"
                 value={nombre}
                 onIonChange={e => setNombre(e.detail.value!)}
               />
@@ -97,7 +107,7 @@ const Register: React.FC = () => {
               <label>Correo electrónico</label>
               <IonInput
                 type="email"
-                placeholder="juan@email.com"
+                //placeholder="juan@email.com"
                 value={email}
                 onIonChange={e => setEmail(e.detail.value!)}
               />
@@ -107,7 +117,7 @@ const Register: React.FC = () => {
               <label>Teléfono</label>
               <IonInput
                 type="tel"
-                placeholder="+57 300 123 4567"
+                //placeholder="+57 300 123 4567"
                 value={telefono}
                 onIonChange={e => setTelefono(e.detail.value!)}
               />
@@ -117,7 +127,7 @@ const Register: React.FC = () => {
               <label>Contraseña</label>
               <IonInput
                 type="password"
-                placeholder="••••••••"
+                //placeholder="••••••••"
                 value={password}
                 onIonChange={e => setPassword(e.detail.value!)}
               />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   IonContent,
   IonPage,
@@ -8,7 +8,8 @@ import {
   IonSearchbar,
   IonCard,
   IonCardContent,
-  IonIcon
+  IonIcon,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -30,11 +31,16 @@ const Patients: React.FC = () => {
   const [clients, setClients] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
 
-  useEffect(() => {
-
+  useIonViewWillEnter(() => {
     const loadData = async () => {
+      // Limpiar estados primero
+      setUser(null);
+      setAllPets([]);
+      setFilteredPets([]);
+      setSearchText('');
+      setClients([]);
+      setAppointments([]);
 
-      await sqliteService.initDB();
       const currentUser = authService.getCurrentUser();
       if (!currentUser || currentUser.tipo !== 'veterinario') {
         history.push('/login');
@@ -44,28 +50,26 @@ const Patients: React.FC = () => {
 
       // Cargar todas las citas del veterinario para saber qué pacientes ha atendido
       const allAppointments = await sqliteService.getAppointments();
-      const vetAppointments = allAppointments.filter((a : any)=> a.veterinarioId === currentUser.id);
+      const vetAppointments = allAppointments.filter((a: any) => a.veterinarioId === currentUser.id);
       setAppointments(vetAppointments);
 
       // Obtener IDs únicos de mascotas
-      const uniquePetIds = [...new Set(vetAppointments.map((a : any) => a.mascotaId))];
+      const uniquePetIds = [...new Set(vetAppointments.map((a: any) => a.mascotaId))];
 
       // Cargar las mascotas que ha atendido
       const allPetsData = await sqliteService.getPets();
-      const vetPets = allPetsData.filter((p : any) => uniquePetIds.includes(p.id));
+      const vetPets = allPetsData.filter((p: any) => uniquePetIds.includes(p.id));
       setAllPets(vetPets);
       setFilteredPets(vetPets);
 
       // Cargar clientes
       const allUsers = await sqliteService.getUsers();
-      const clientUsers = allUsers.filter((u : any) => u.tipo === 'cliente');
+      const clientUsers = allUsers.filter((u: any) => u.tipo === 'cliente');
       setClients(clientUsers);
-
     };
 
     loadData();
-
-  }, [history]);
+  });
 
   const handleSearch = (text: string) => {
     setSearchText(text);
@@ -210,7 +214,6 @@ const Patients: React.FC = () => {
                 <IonCard 
                   key={pet.id} 
                   className="patient-card"
-                  //onClick={() => alert(`Ver historial de ${pet.nombre} - Función en desarrollo`)}
                   onClick={() => history.push(`/vet/pet-history/${pet.id}`)}
                 >
                   <IonCardContent>

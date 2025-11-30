@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   IonContent,
   IonPage,
@@ -15,7 +15,8 @@ import {
   IonInput,
   IonSelect,
   IonSelectOption,
-  IonToast
+  IonToast,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -25,7 +26,7 @@ import {
   personOutline,
   addOutline
 } from 'ionicons/icons';
-import authService from '../../services/auth.service';;
+import authService from '../../services/auth.service';
 import sqliteService from '../../services/sqlite.service';
 import './Pets.css';
 
@@ -45,10 +46,9 @@ const Pets: React.FC = () => {
   const [peso, setPeso] = useState('');
   const [color, setColor] = useState('');
 
-  useEffect(() => {
-
+  // Usar useIonViewWillEnter en lugar de useEffect
+  useIonViewWillEnter(() => {
     const loadData = async () => {
-
       const currentUser = authService.getCurrentUser();
       if (!currentUser) {
         history.push('/login');
@@ -57,52 +57,50 @@ const Pets: React.FC = () => {
 
       setUser(currentUser);
       await loadPets(currentUser.id);
-
-
     };
 
     loadData();
-    
-  }, [history]);
+  });
 
   const loadPets = async (userId: number) => {
     const allPets = await sqliteService.getPets();
-    const userPets = allPets.filter((p : any)=> p.clienteId === userId);
+    const userPets = allPets.filter((p: any) => p.clienteId === userId);
     setPets(userPets);
   };
 
   const handleAddPet = async () => {
-  if (!nombre || !raza || !edad || !peso) {
-    setToastMessage('Por favor completa todos los campos');
+    if (!nombre || !raza || !edad || !peso) {
+      setToastMessage('Por favor completa todos los campos');
+      setShowToast(true);
+      return;
+    }
+
+    const newPet = {
+      nombre,
+      especie,
+      raza,
+      edad: parseInt(edad),
+      peso: parseFloat(peso),
+      color,
+      clienteId: user.id
+    };
+
+    const newPetId = await sqliteService.addPet(newPet);
+    
+    setToastMessage('¡Mascota agregada exitosamente!');
     setShowToast(true);
-    return;
-  }
-
-  const newPet = {
-    nombre,
-    especie,
-    raza,
-    edad: parseInt(edad),
-    peso: parseFloat(peso),
-    color,
-    clienteId: user.id
+    setShowModal(false);
+    
+    // Limpiar formulario
+    setNombre('');
+    setRaza('');
+    setEdad('');
+    setPeso('');
+    setColor('');
+    setEspecie('Perro');
+    
+    await loadPets(user.id);
   };
-
-  const newPetId = await sqliteService.addPet(newPet);
-  
-  setToastMessage('¡Mascota agregada exitosamente!');
-  setShowToast(true);
-  setShowModal(false);
-  
-  // Limpiar formulario
-  setNombre('');
-  setRaza('');
-  setEdad('');
-  setPeso('');
-  setColor('');
-  
-  await loadPets(user.id);
-};
 
   const getPetEmoji = (especie: string) => {
     return especie.toLowerCase() === 'perro' ? '🐕' : '🐈';
@@ -182,7 +180,7 @@ const Pets: React.FC = () => {
                 <label>Nombre</label>
                 <IonInput
                   value={nombre}
-                  placeholder="Max"
+                  //placeholder="Max"
                   onIonChange={e => setNombre(e.detail.value!)}
                 />
               </div>
@@ -202,7 +200,7 @@ const Pets: React.FC = () => {
                 <label>Raza</label>
                 <IonInput
                   value={raza}
-                  placeholder="Labrador"
+                  //placeholder="Labrador"
                   onIonChange={e => setRaza(e.detail.value!)}
                 />
               </div>
@@ -212,7 +210,7 @@ const Pets: React.FC = () => {
                 <IonInput
                   type="number"
                   value={edad}
-                  placeholder="3"
+                  //placeholder="3"
                   onIonChange={e => setEdad(e.detail.value!)}
                 />
               </div>
@@ -222,7 +220,7 @@ const Pets: React.FC = () => {
                 <IonInput
                   type="number"
                   value={peso}
-                  placeholder="28"
+                  //placeholder="28"
                   onIonChange={e => setPeso(e.detail.value!)}
                 />
               </div>
@@ -231,7 +229,7 @@ const Pets: React.FC = () => {
                 <label>Color (opcional)</label>
                 <IonInput
                   value={color}
-                  placeholder="Dorado"
+                  //placeholder="Dorado"
                   onIonChange={e => setColor(e.detail.value!)}
                 />
               </div>

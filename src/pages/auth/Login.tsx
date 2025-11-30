@@ -6,7 +6,8 @@ import {
   IonButton,
   IonText,
   IonLoading,
-  IonToast
+  IonToast,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import authService from '../../services/auth.service';
@@ -19,6 +20,12 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+
+  // Limpiar campos cada vez que se entra a la vista
+  useIonViewWillEnter(() => {
+    setEmail('');
+    setPassword('');
+  });
 
   const handleLogin = async () => {
     // Trim para eliminar espacios en blanco

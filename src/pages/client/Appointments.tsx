@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   IonContent,
   IonPage,
@@ -19,7 +19,8 @@ import {
   IonSelectOption,
   IonToast,
   IonDatetime,
-  IonTextarea
+  IonTextarea,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -31,7 +32,6 @@ import {
 } from 'ionicons/icons';
 import authService from '../../services/auth.service';
 import sqliteService from '../../services/sqlite.service';
-import { useIonViewWillEnter } from '@ionic/react';
 import './Appointments.css';
 
 const Appointments: React.FC = () => {
@@ -59,8 +59,6 @@ const Appointments: React.FC = () => {
 
   useIonViewWillEnter(() => {
     const loadData = async () => {
-      await sqliteService.initDB();
-
       const currentUser = authService.getCurrentUser();
       if (!currentUser) {
         history.push('/login');
@@ -111,6 +109,12 @@ const Appointments: React.FC = () => {
       return;
     }
 
+    if (!mascotaId || !veterinarioId || !servicio || !fecha || !horaInicio || !horaFin) {
+      setToastMessage('Por favor completa todos los campos obligatorios');
+      setShowToast(true);
+      return;
+    }
+
     const fechaFormateada = fecha.split('T')[0];
 
     const newAppointment = {
@@ -137,6 +141,7 @@ const Appointments: React.FC = () => {
       setShowToast(true);
       setShowModal(false);
 
+      // Limpiar formulario
       setFecha('');
       setHoraInicio('');
       setHoraFin('');
@@ -147,26 +152,35 @@ const Appointments: React.FC = () => {
       setSintomas('');
 
       await loadAppointments(user.id);
-    } catch {
+    } catch (error) {
+      console.error('Error adding appointment:', error);
       setToastMessage('Error al agendar la cita');
       setShowToast(true);
     }
   };
 
   const getFilteredAppointments = () => {
+    // Obtener la fecha de hoy en formato YYYY-MM-DD
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const todayYear = today.getFullYear();
+    const todayMonth = String(today.getMonth() + 1).padStart(2, '0');
+    const todayDay = String(today.getDate()).padStart(2, '0');
+    const todayDate = `${todayYear}-${todayMonth}-${todayDay}`;
 
     if (filter === 'proximas') {
-      return appointments.filter(a => {
-        const appointmentDate = new Date(a.fecha);
-        return appointmentDate >= today && a.estado !== 'cancelada' && a.estado !== 'completada';
-      });
+      // Mostrar citas de hoy en adelante que NO estén completadas ni canceladas
+      return appointments.filter(a => 
+        a.fecha >= todayDate && 
+        a.estado !== 'cancelada' && 
+        a.estado !== 'completada'
+      );
     } else {
-      return appointments.filter(a => {
-        const appointmentDate = new Date(a.fecha);
-        return appointmentDate < today || a.estado === 'completada' || a.estado === 'cancelada';
-      });
+      // Mostrar citas pasadas O completadas O canceladas
+      return appointments.filter(a => 
+        a.fecha < todayDate || 
+        a.estado === 'completada' || 
+        a.estado === 'cancelada'
+      );
     }
   };
 
@@ -193,6 +207,12 @@ const Appointments: React.FC = () => {
       default:
         return 'badge-info';
     }
+  };
+
+  const formatDate = (dateStr: string): string => {
+    const [year, month, day] = dateStr.split('-');
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return `${day} ${months[parseInt(month) - 1]} ${year}`;
   };
 
   const filteredAppointments = getFilteredAppointments();
@@ -234,7 +254,7 @@ const Appointments: React.FC = () => {
                   </span>
 
                   <div className="appointment-time">
-                    🕐 {appointment.fecha} - {appointment.horaInicio}
+                    🕐 {formatDate(appointment.fecha)} - {appointment.horaInicio}
                   </div>
 
                   <h4>{appointment.servicio}</h4>
@@ -373,36 +393,30 @@ const Appointments: React.FC = () => {
 
               <div className="input-group">
                 <label>Hora de Inicio *</label>
-                 <IonDatetime
+                <IonDatetime
                   value={horaInicio}
                   presentation="time"
                   onIonChange={e => {
-                  const raw = e.target.value as string; 
-                  if (!raw) return;
-                
-                    // IonDatetime puede devolver "HH:mm" o "YYYY-MM-DDTHH:mm:ss"
+                    const raw = e.target.value as string; 
+                    if (!raw) return;
                     const time = raw.length > 5 ? raw.split("T")[1].substring(0, 5) : raw;
-                
                     setHoraInicio(time);
-                    }}
-                  />
+                  }}
+                />
               </div>
 
               <div className="input-group">
                 <label>Hora de Fin *</label>
-                 <IonDatetime
-                    value={horaFin}
-                    presentation="time"
-                    onIonChange={e => {
-                    const raw = e.target.value as string; // Siempre funciona
+                <IonDatetime
+                  value={horaFin}
+                  presentation="time"
+                  onIonChange={e => {
+                    const raw = e.target.value as string;
                     if (!raw) return;
-                
-                      // IonDatetime devuelve "HH:mm" en presentation="time"
-                      const time = raw.length > 5 ? raw.split("T")[1].substring(0, 5) : raw;
-                
-                      setHoraFin(time);
-                    }}
-                  />
+                    const time = raw.length > 5 ? raw.split("T")[1].substring(0, 5) : raw;
+                    setHoraFin(time);
+                  }}
+                />
               </div>
 
               <div className="input-group">
@@ -411,8 +425,7 @@ const Appointments: React.FC = () => {
                   value={sintomas}
                   placeholder="Describe los síntomas de tu mascota..."
                   rows={3}
-                  //onIonChange={e => setSintomas(e.detail.value!)}
-                   onIonChange={(e) => setSintomas(e.target.value as string)}
+                  onIonChange={(e) => setSintomas(e.target.value as string)}
                 />
               </div>
 
@@ -466,6 +479,7 @@ const Appointments: React.FC = () => {
           onDidDismiss={() => setShowToast(false)}
           message={toastMessage}
           duration={2000}
+          color={toastMessage.includes('éxito') ? 'success' : 'warning'}
         />
       </IonContent>
     </IonPage>

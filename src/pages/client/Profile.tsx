@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   IonContent,
   IonPage,
@@ -15,7 +15,8 @@ import {
   IonAlert,
   IonModal,
   IonInput,
-  IonToast
+  IonToast,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -48,12 +49,9 @@ const Profile: React.FC = () => {
   const [telefono, setTelefono] = useState('');
   const [direccion, setDireccion] = useState('');
 
-  useEffect(() => {
-
+  // Usar useIonViewWillEnter en lugar de useEffect
+  useIonViewWillEnter(() => {
     const loadData = async () => {
-
-      await sqliteService.initDB();
-
       const currentUser = authService.getCurrentUser();
       if (!currentUser) {
         history.push('/login');
@@ -63,18 +61,16 @@ const Profile: React.FC = () => {
 
       // Cargar estadísticas
       const allPets = await sqliteService.getPets();
-      const userPets = allPets.filter((p : any) => p.clienteId === currentUser.id);
+      const userPets = allPets.filter((p: any) => p.clienteId === currentUser.id);
       setPets(userPets);
 
       const allAppointments = await sqliteService.getAppointments();
-      const userAppointments = allAppointments.filter((a : any) => a.clienteId === currentUser.id);
+      const userAppointments = allAppointments.filter((a: any) => a.clienteId === currentUser.id);
       setAppointments(userAppointments);
-
     };
 
     loadData();
-    
-  }, [history]);
+  });
 
   const handleEditClick = () => {
     // Cargar datos actuales en el formulario
@@ -121,6 +117,7 @@ const Profile: React.FC = () => {
       setShowToast(true);
       setShowEditModal(false);
     } catch (error) {
+      console.error('Error updating profile:', error);
       setToastMessage('Error al actualizar el perfil');
       setShowToast(true);
     }
@@ -131,10 +128,7 @@ const Profile: React.FC = () => {
     history.push('/login');
   };
 
-  const calculateYears = () => {
-    // Simular años de uso (puedes mejorar esto con fecha de registro real)
-    return 2;
-  };
+ 
 
   return (
     <IonPage>
@@ -161,11 +155,11 @@ const Profile: React.FC = () => {
               <h4>Información Personal</h4>
               <div className="info-row">
                 <span className="label">Teléfono</span>
-                <span className="value">{user?.telefono || '+57 300 123 4567'}</span>
+                <span className="value">{user?.telefono || 'Agruegue su número de telefono'}</span>
               </div>
               <div className="info-row">
                 <span className="label">Dirección</span>
-                <span className="value">{user?.direccion || 'Calle 100 #15-20, Bogotá'}</span>
+                <span className="value">{user?.direccion || 'Agregue su dirección'}</span>
               </div>
               <div className="info-row">
                 <span className="label">Correo</span>
@@ -187,10 +181,7 @@ const Profile: React.FC = () => {
                   <div className="stat-value">{appointments.length}</div>
                   <div className="stat-label">Citas</div>
                 </div>
-                <div className="stat-item">
-                  <div className="stat-value">{calculateYears()}</div>
-                  <div className="stat-label">Años</div>
-                </div>
+               
               </div>
             </IonCardContent>
           </IonCard>
@@ -297,7 +288,7 @@ const Profile: React.FC = () => {
                 <label>Dirección</label>
                 <IonInput
                   value={direccion}
-                  placeholder="Calle 100 #15-20, Bogotá"
+                  //placeholder="Calle 100 #15-20, Bogotá"
                   onIonChange={e => setDireccion(e.detail.value!)}
                 />
               </div>
@@ -336,6 +327,7 @@ const Profile: React.FC = () => {
           onDidDismiss={() => setShowToast(false)}
           message={toastMessage}
           duration={2000}
+          color={toastMessage.includes('éxito') ? 'success' : 'warning'}
         />
       </IonContent>
     </IonPage>

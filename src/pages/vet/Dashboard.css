@@ -18,6 +18,12 @@
 
 .vet-stat {
   background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
+  color: white !important;
+}
+
+/* Forzar color blanco en todos los elementos hijos de vet-stat */
+.vet-stat * {
+  color: white !important;
 }
 
 .vet-appointment {
@@ -88,22 +94,27 @@
 }
 
 .stat-card {
-  color: white;
+  color: white !important;
   padding: 25px;
   border-radius: 15px;
   text-align: center;
   box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
 }
 
-.stat-number {
+/* Selectores específicos para máxima prioridad */
+.stat-card .stat-number,
+.vet-stat .stat-number {
   font-size: 40px;
   font-weight: bold;
   margin-bottom: 8px;
+  color: white !important;
 }
 
-.stat-label {
+.stat-card .stat-label,
+.vet-stat .stat-label {
   font-size: 14px;
   opacity: 0.95;
+  color: white !important;
 }
 
 .section-title {

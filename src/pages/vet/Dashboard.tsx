@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   IonContent,
   IonPage,
@@ -8,7 +8,8 @@ import {
   IonRow,
   IonCol,
   IonButton,
-  IonIcon
+  IonIcon,
+  useIonViewWillEnter
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { 
@@ -20,7 +21,6 @@ import {
 import authService from '../../services/auth.service';
 import sqliteService from '../../services/sqlite.service';
 import './Dashboard.css';
-import { useIonViewWillEnter } from '@ionic/react';
 
 const VetDashboard: React.FC = () => {
   const history = useHistory();
@@ -30,9 +30,8 @@ const VetDashboard: React.FC = () => {
   const [pets, setPets] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
 
-    useIonViewWillEnter(() => {
+  useIonViewWillEnter(() => {
     const loadDashboard = async () => {
-     
       const currentUser = authService.getCurrentUser();
       if (!currentUser || currentUser.tipo !== 'veterinario') {
         history.push('/login');
@@ -58,9 +57,7 @@ const VetDashboard: React.FC = () => {
       );
 
       setTodayAppointments(todayAppts);
-      //setTodayAppointments(vetAppointments);
 
-    
       const allPets = await sqliteService.getPets();
       setPets(allPets);
 
@@ -70,7 +67,6 @@ const VetDashboard: React.FC = () => {
 
       setAllPatients(uniquePetIds);
 
-      
       const allUsers = await sqliteService.getUsers();
       const clientUsers = allUsers.filter((u: any) => u.tipo === "cliente");
       setClients(clientUsers);
@@ -106,12 +102,19 @@ const VetDashboard: React.FC = () => {
     return especie.toLowerCase() === 'perro' ? '🐕' : '🐈';
   };
 
+  // Función para obtener el primer nombre del veterinario
+  const getFirstName = () => {
+    if (!user?.nombre) return 'Doctor';
+    const names = user.nombre.split(' ');
+    return names[0];
+  };
+
   return (
     <IonPage>
       <IonContent>
         {/* Header con color verde */}
         <div className="vet-header">
-          <h1>Hola, Dr. {user?.nombre?.split(' ')[1] || 'López'} 👨‍⚕️</h1>
+          <h1>Hola, Dr. {getFirstName()} 👨‍⚕️</h1>
           <p>Panel de control veterinario</p>
         </div>
 
