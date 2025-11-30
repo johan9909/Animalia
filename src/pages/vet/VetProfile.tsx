@@ -30,7 +30,11 @@ import './VetProfile.css';
 
 const VetProfile: React.FC = () => {
   const history = useHistory();
-  const [user, setUser] = useState<any>(null);
+  
+  // ⭐ CAMBIO 1: Obtener usuario al inicio como en Profile
+  const current = authService.getCurrentUser();
+  const [user, setUser] = useState<any>(current ? { ...current } : null);
+  
   const [appointments, setAppointments] = useState<any[]>([]);
   const [patients, setPatients] = useState<number>(0);
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
@@ -40,28 +44,24 @@ const VetProfile: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
 
-  // Estados del formulario de edición
-  const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
-  const [especialidad, setEspecialidad] = useState('');
-  const [licencia, setLicencia] = useState('');
-  const [experiencia, setExperiencia] = useState('');
-  const [horario, setHorario] = useState('');
+  // ⭐ CAMBIO 2: Inicializar estados del formulario con valores del usuario
+  const [nombre, setNombre] = useState(current?.nombre || '');
+  const [email, setEmail] = useState(current?.email || '');
+  const [especialidad, setEspecialidad] = useState(current?.especialidad || '');
+  const [licencia, setLicencia] = useState(current?.licencia || '');
+  const [experiencia, setExperiencia] = useState(current?.experiencia?.toString() || '');
+  const [horario, setHorario] = useState(current?.horario || '');
 
-  // Cambiar useEffect por useIonViewWillEnter
   useIonViewWillEnter(() => {
     const loadData = async () => {
-      // Limpiar estados primero
-      setUser(null);
-      setAppointments([]);
-      setPatients(0);
-      
       const currentUser = authService.getCurrentUser();
       if (!currentUser || currentUser.tipo !== 'veterinario') {
         history.push('/login');
         return;
       }
-      setUser(currentUser);
+      
+      // ⭐ CAMBIO 3: Actualizar estado con spread como en Profile
+      setUser({ ...currentUser });
 
       // Cargar estadísticas
       const allAppointments = await sqliteService.getAppointments();
@@ -80,10 +80,10 @@ const VetProfile: React.FC = () => {
     // Cargar datos actuales en el formulario
     setNombre(user.nombre);
     setEmail(user.email);
-    setEspecialidad(user.especialidad || 'Medicina General Veterinaria');
-    setLicencia(user.licencia || 'MV-12345');
-    setExperiencia(user.experiencia?.toString() || '8');
-    setHorario(user.horario || 'Lun-Vie: 8:00 AM - 6:00 PM');
+    setEspecialidad(user.especialidad || '');
+    setLicencia(user.licencia || '');
+    setExperiencia(user.experiencia?.toString() || '');
+    setHorario(user.horario || '');
     setShowEditModal(true);
   };
 
@@ -113,22 +113,29 @@ const VetProfile: React.FC = () => {
     };
 
     try {
+      console.log('📝 Actualizando perfil veterinario...', updatedUser);
+      
+      // 1. Actualizar en SQLite
       await sqliteService.updateUser(user.id, updatedUser);
       
-      // Actualizar el usuario en localStorage
+      // 2. Actualizar en localStorage
       authService.updateCurrentUser(updatedUser);
       
-      // Actualizar estado local
-      setUser(updatedUser);
+      // ⭐ CAMBIO 4: Usar spread operator como en Profile del cliente
+      setUser((prev: any) => ({ ...prev, ...updatedUser }));
       
       setToastMessage('¡Perfil actualizado exitosamente!');
       setShowToast(true);
       setShowEditModal(false);
+      
+      console.log('✅ Perfil veterinario actualizado');
     } catch (error) {
       console.error('Error updating profile:', error);
       setToastMessage('Error al actualizar el perfil');
       setShowToast(true);
     }
+    
+    // ⭐ CAMBIO 5: REMOVIDO history.replace - no es necesario
   };
 
   const handleLogout = () => {
@@ -147,10 +154,9 @@ const VetProfile: React.FC = () => {
     }).length;
   };
 
-  const getAverageRating = () => {
-    // Simulado - podrías implementar un sistema de calificaciones real
-    return 4.9;
-  };
+  if (!user) {
+    return null;
+  }
 
   return (
     <IonPage>
@@ -177,7 +183,7 @@ const VetProfile: React.FC = () => {
               <h4>Información Profesional</h4>
               <div className="info-row">
                 <span className="label">Especialidad</span>
-                <span className="value">{user?.especialidad || 'Agregue una espcialidad'}</span>
+                <span className="value">{user?.especialidad || 'Agregue una especialidad'}</span>
               </div>
               <div className="info-row">
                 <span className="label">Licencia Profesional</span>
@@ -185,7 +191,7 @@ const VetProfile: React.FC = () => {
               </div>
               <div className="info-row">
                 <span className="label">Años de Experiencia</span>
-                <span className="value">{user?.experiencia || 8} años</span>
+                <span className="value">{user?.experiencia || 0} años</span>
               </div>
               <div className="info-row">
                 <span className="label">Horario de Atención</span>
@@ -284,8 +290,7 @@ const VetProfile: React.FC = () => {
                 <label>Nombre Completo *</label>
                 <IonInput
                   value={nombre}
-                  //placeholder="Dr. Juan Pérez"
-                  onIonChange={e => setNombre(e.detail.value!)}
+                  onIonInput={e => setNombre(e.detail.value || '')}
                 />
               </div>
 
@@ -294,8 +299,7 @@ const VetProfile: React.FC = () => {
                 <IonInput
                   type="email"
                   value={email}
-                  //placeholder="doctor@veterinaria.com"
-                  onIonChange={e => setEmail(e.detail.value!)}
+                  onIonInput={e => setEmail(e.detail.value || '')}
                 />
               </div>
 
@@ -303,8 +307,7 @@ const VetProfile: React.FC = () => {
                 <label>Especialidad</label>
                 <IonInput
                   value={especialidad}
-                  //placeholder="Medicina General Veterinaria"
-                  onIonChange={e => setEspecialidad(e.detail.value!)}
+                  onIonInput={e => setEspecialidad(e.detail.value || '')}
                 />
               </div>
 
@@ -312,8 +315,7 @@ const VetProfile: React.FC = () => {
                 <label>Licencia Profesional</label>
                 <IonInput
                   value={licencia}
-                  //placeholder="MV-12345"
-                  onIonChange={e => setLicencia(e.detail.value!)}
+                  onIonInput={e => setLicencia(e.detail.value || '')}
                 />
               </div>
 
@@ -322,8 +324,7 @@ const VetProfile: React.FC = () => {
                 <IonInput
                   type="number"
                   value={experiencia}
-                  //placeholder="8"
-                  onIonChange={e => setExperiencia(e.detail.value!)}
+                  onIonInput={e => setExperiencia(e.detail.value || '')}
                 />
               </div>
 
@@ -331,8 +332,7 @@ const VetProfile: React.FC = () => {
                 <label>Horario de Atención</label>
                 <IonInput
                   value={horario}
-                  //placeholder="Lun-Vie: 8:00 AM - 6:00 PM"
-                  onIonChange={e => setHorario(e.detail.value!)}
+                  onIonInput={e => setHorario(e.detail.value || '')}
                 />
               </div>
 

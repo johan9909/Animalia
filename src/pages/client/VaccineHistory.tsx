@@ -48,7 +48,7 @@ const VaccineHistory: React.FC = () => {
   }, [petId]);
 
   const loadData = async () => {
-    await sqliteService.initDB();
+
     const allPets = await sqliteService.getPets();
     const foundPet = allPets.find((p: any) => p.id === parseInt(petId));
     

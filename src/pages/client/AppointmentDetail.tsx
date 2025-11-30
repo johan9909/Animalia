@@ -408,8 +408,8 @@ const AppointmentDetail: React.FC = () => {
                   value={sintomas}
                   placeholder="Describe los síntomas de tu mascota..."
                   rows={3}
-                  //onIonChange={e => setSintomas(e.detail.value!)}
-                  onIonChange={(e) => setSintomas(e.target.value as string)}
+                  onIonInput={e => setSintomas(e.detail.value || '')}
+                  //onIonChange={(e) => setSintomas(e.target.value as string)}
                 />
               </div>
 

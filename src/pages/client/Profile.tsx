@@ -8,9 +8,6 @@ import {
   IonCard,
   IonCardContent,
   IonButton,
-  IonTabBar,
-  IonTabButton,
-  IonLabel,
   IonIcon,
   IonAlert,
   IonModal,
@@ -33,7 +30,11 @@ import './Profile.css';
 
 const Profile: React.FC = () => {
   const history = useHistory();
-  const [user, setUser] = useState<any>(null);
+  
+  // Obtener usuario actual al inicio
+  const current = authService.getCurrentUser();
+  const [user, setUser] = useState<any>(current ? { ...current } : null);
+  
   const [pets, setPets] = useState<any[]>([]);
   const [appointments, setAppointments] = useState<any[]>([]);
   const [showLogoutAlert, setShowLogoutAlert] = useState(false);
@@ -44,12 +45,12 @@ const Profile: React.FC = () => {
   const [toastMessage, setToastMessage] = useState('');
 
   // Estados del formulario de edición
-  const [nombre, setNombre] = useState('');
-  const [email, setEmail] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [direccion, setDireccion] = useState('');
+  const [nombre, setNombre] = useState(user?.nombre || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [telefono, setTelefono] = useState(user?.telefono || '');
+  const [direccion, setDireccion] = useState(user?.direccion || '');
 
-  // Usar useIonViewWillEnter en lugar de useEffect
+  // Cargar datos al entrar a la vista
   useIonViewWillEnter(() => {
     const loadData = async () => {
       const currentUser = authService.getCurrentUser();
@@ -57,7 +58,9 @@ const Profile: React.FC = () => {
         history.push('/login');
         return;
       }
-      setUser(currentUser);
+
+      // Actualizar estado con usuario actual
+      setUser({ ...currentUser });
 
       // Cargar estadísticas
       const allPets = await sqliteService.getPets();
@@ -105,19 +108,26 @@ const Profile: React.FC = () => {
     };
 
     try {
+      console.log('📝 Actualizando perfil...', updatedUser);
+      
+      // 1. Actualizar en SQLite
       await sqliteService.updateUser(user.id, updatedUser);
+      //console.log('✅ SQLite actualizado');
       
-      // Actualizar el usuario en localStorage
+      // 2. Actualizar en localStorage
       authService.updateCurrentUser(updatedUser);
+      //console.log('✅ localStorage actualizado');
       
-      // Actualizar estado local
-      setUser(updatedUser);
+      // 3. CRÍTICO: Forzar actualización del estado → refresca en Android
+      setUser((prev: any) => ({ ...prev, ...updatedUser }));
+
+      //console.log('✅ Estado React actualizado');
       
       setToastMessage('¡Perfil actualizado exitosamente!');
       setShowToast(true);
       setShowEditModal(false);
     } catch (error) {
-      console.error('Error updating profile:', error);
+      console.error('❌ Error updating profile:', error);
       setToastMessage('Error al actualizar el perfil');
       setShowToast(true);
     }
@@ -128,10 +138,12 @@ const Profile: React.FC = () => {
     history.push('/login');
   };
 
- 
+  if (!user) {
+    return null;
+  }
 
   return (
-    <IonPage>
+    <IonPage id="profile-page" key={user.id}>
       <IonHeader>
         <IonToolbar style={{ '--background': 'var(--gradient-primary)' }}>
           <IonTitle color="light">Mi Perfil 👤</IonTitle>
@@ -155,7 +167,7 @@ const Profile: React.FC = () => {
               <h4>Información Personal</h4>
               <div className="info-row">
                 <span className="label">Teléfono</span>
-                <span className="value">{user?.telefono || 'Agruegue su número de telefono'}</span>
+                <span className="value">{user?.telefono || 'Agregue su número de teléfono'}</span>
               </div>
               <div className="info-row">
                 <span className="label">Dirección</span>
@@ -181,7 +193,6 @@ const Profile: React.FC = () => {
                   <div className="stat-value">{appointments.length}</div>
                   <div className="stat-label">Citas</div>
                 </div>
-               
               </div>
             </IonCardContent>
           </IonCard>
@@ -259,8 +270,8 @@ const Profile: React.FC = () => {
                 <label>Nombre *</label>
                 <IonInput
                   value={nombre}
-                  placeholder="Juan Pérez"
-                  onIonChange={e => setNombre(e.detail.value!)}
+                  //placeholder="Juan Pérez"
+                  onIonInput={e => setNombre(e.detail.value || '')}
                 />
               </div>
 
@@ -269,8 +280,8 @@ const Profile: React.FC = () => {
                 <IonInput
                   type="email"
                   value={email}
-                  placeholder="correo@ejemplo.com"
-                  onIonChange={e => setEmail(e.detail.value!)}
+                  //placeholder="correo@ejemplo.com"
+                  onIonInput={e => setEmail(e.detail.value || '')}
                 />
               </div>
 
@@ -279,8 +290,8 @@ const Profile: React.FC = () => {
                 <IonInput
                   type="tel"
                   value={telefono}
-                  placeholder="+57 300 123 4567"
-                  onIonChange={e => setTelefono(e.detail.value!)}
+                  //placeholder="+57 300 123 4567"
+                  onIonInput={e => setTelefono(e.detail.value || '')}
                 />
               </div>
 
@@ -289,7 +300,7 @@ const Profile: React.FC = () => {
                 <IonInput
                   value={direccion}
                   //placeholder="Calle 100 #15-20, Bogotá"
-                  onIonChange={e => setDireccion(e.detail.value!)}
+                  onIonInput={e => setDireccion(e.detail.value || '')}
                 />
               </div>
 

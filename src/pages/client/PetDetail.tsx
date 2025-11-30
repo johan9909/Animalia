@@ -48,7 +48,7 @@ const PetDetail: React.FC = () => {
 
     const loadData = async () => {
       
-      await sqliteService.initDB();
+     
       const allPets = await sqliteService.getPets();
       const foundPet = allPets.find(( p : any) => p.id === parseInt(id));
       setPet(foundPet);
@@ -202,7 +202,7 @@ const PetDetail: React.FC = () => {
                 <IonInput
                   value={nombre}
                   placeholder="Max"
-                  onIonChange={e => setNombre(e.detail.value!)}
+                  onIonInput={e => setNombre(e.detail.value || '')}
                 />
               </div>
 
@@ -222,7 +222,7 @@ const PetDetail: React.FC = () => {
                 <IonInput
                   value={raza}
                   placeholder="Labrador"
-                  onIonChange={e => setRaza(e.detail.value!)}
+                  onIonInput={e => setRaza(e.detail.value || '')}
                 />
               </div>
 
@@ -232,7 +232,7 @@ const PetDetail: React.FC = () => {
                   type="number"
                   value={edad}
                   placeholder="3"
-                  onIonChange={e => setEdad(e.detail.value!)}
+                  onIonInput={e => setEdad(e.detail.value || '')}
                 />
               </div>
 
@@ -242,7 +242,7 @@ const PetDetail: React.FC = () => {
                   type="number"
                   value={peso}
                   placeholder="28"
-                  onIonChange={e => setPeso(e.detail.value!)}
+                  onIonInput={e => setPeso(e.detail.value || '')}
                 />
               </div>
 
@@ -251,7 +251,7 @@ const PetDetail: React.FC = () => {
                 <IonInput
                   value={color}
                   placeholder="Dorado"
-                  onIonChange={e => setColor(e.detail.value!)}
+                  onIonInput={e => setColor(e.detail.value || '')}
                 />
               </div>
 

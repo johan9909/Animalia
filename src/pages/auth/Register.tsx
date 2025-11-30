@@ -49,29 +49,39 @@ const Register: React.FC = () => {
     }
 
     setLoading(true);
-    const result = await authService.register({
-      nombre,
-      email,
-      telefono,
-      password,
-      tipo
-    });
-    setLoading(false);
-
-    if (result.success) {
-      setToastMessage('¡Cuenta creada exitosamente!');
-      setToastColor('success');
-      setShowToast(true);
+    
+    try {
+      const result = await authService.register({
+        nombre,
+        email,
+        telefono,
+        password,
+        tipo
+      });
       
-      setTimeout(() => {
-        if (result.user.tipo === 'cliente') {
-          history.push('/client/dashboard');
-        } else {
-          history.push('/vet/dashboard');
-        }
-      }, 1500);
-    } else {
-      setToastMessage(result.message || 'Error al crear la cuenta');
+      setLoading(false);
+
+      if (result.success) {
+        setToastMessage('¡Cuenta creada exitosamente!');
+        setToastColor('success');
+        setShowToast(true);
+        
+        setTimeout(() => {
+          if (result.user.tipo === 'cliente') {
+            history.push('/client/dashboard');
+          } else {
+            history.push('/vet/dashboard');
+          }
+        }, 1500);
+      } else {
+        setToastMessage(result.message || 'Error al crear la cuenta');
+        setToastColor('danger');
+        setShowToast(true);
+      }
+    } catch (error) {
+      console.error('Error en registro:', error);
+      setLoading(false);
+      setToastMessage('Error al procesar el registro');
       setToastColor('danger');
       setShowToast(true);
     }
