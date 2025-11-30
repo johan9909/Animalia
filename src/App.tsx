@@ -21,8 +21,9 @@ import AppointmentHistory from './pages/client/AppointmentHistory';
 import VetDashboard from './pages/vet/Dashboard';
 import Schedule from './pages/vet/Schedule';
 import Patients from './pages/vet/Patients';
-import Consultation from './pages/vet/Consultation';
+import consultation from './pages/vet/Consultation';  
 import VetProfile from './pages/vet/VetProfile';
+import PetHistory from './pages/vet/Pethistory';
 
 
 
@@ -80,8 +81,9 @@ const App: React.FC = () => {
            <Route exact path="/vet/dashboard" component={VetDashboard} />
            <Route exact path="/vet/schedule" component={Schedule} />
            <Route exact path="/vet/patients" component={Patients} />
-           <Route exact path="/vet/consultation/:id" component={Consultation} />
+           <Route exact path="/vet/consultation/:id" component={consultation} />
            <Route exact path="/vet/profile" component={VetProfile} />
+           <Route path="/vet/pet-history/:petId" component={PetHistory} exact />
 
           <Route exact path="/">
             <Redirect to="/login" />

@@ -377,7 +377,7 @@ const Appointments: React.FC = () => {
                   value={horaInicio}
                   presentation="time"
                   onIonChange={e => {
-                  const raw = e.target.value as string; // Más confiable que e.detail.value
+                  const raw = e.target.value as string; 
                   if (!raw) return;
                 
                     // IonDatetime puede devolver "HH:mm" o "YYYY-MM-DDTHH:mm:ss"

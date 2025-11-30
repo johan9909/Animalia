@@ -349,7 +349,7 @@ class SQLiteService {
   updateAppointment(id: number, appointment: any) {
     this.db.run(
       `UPDATE appointments 
-       SET diagnostico = ?, tratamiento = ?, sintomas = ?, temperatura = ?, pesoActual = ?, estado = ?,  
+       SET diagnostico = ?, tratamiento = ?, sintomas = ?, temperatura = ?, pesoActual = ?, estado = ?  
        WHERE id = ?`,
       [
         appointment.diagnostico || null,

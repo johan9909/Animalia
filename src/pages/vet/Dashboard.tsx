@@ -20,6 +20,7 @@ import {
 import authService from '../../services/auth.service';
 import sqliteService from '../../services/sqlite.service';
 import './Dashboard.css';
+import { useIonViewWillEnter } from '@ionic/react';
 
 const VetDashboard: React.FC = () => {
   const history = useHistory();
@@ -29,7 +30,7 @@ const VetDashboard: React.FC = () => {
   const [pets, setPets] = useState<any[]>([]);
   const [clients, setClients] = useState<any[]>([]);
 
-    useEffect(() => {
+    useIonViewWillEnter(() => {
     const loadDashboard = async () => {
      
       const currentUser = authService.getCurrentUser();
@@ -45,10 +46,15 @@ const VetDashboard: React.FC = () => {
         (a: any) => a.veterinarioId === currentUser.id
       );
 
-      const today = new Date().toISOString().split("T")[0];
+      // Calcular la fecha de hoy en formato YYYY-MM-DD
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayDate = `${year}-${month}-${day}`;
+
       const todayAppts = vetAppointments.filter(
-        (a: any) => a.fecha === today
-        //(a: any) => a.fecha === "2024-11-02"
+        (a: any) => a.fecha === todayDate && a.estado === 'pendiente'
       );
 
       setTodayAppointments(todayAppts);
@@ -71,7 +77,7 @@ const VetDashboard: React.FC = () => {
     };
 
     loadDashboard();
-  }, [history]);
+  });
 
   const getPetInfo = (petId: number) => {
     const pet = pets.find(p => p.id === petId);
@@ -116,7 +122,7 @@ const VetDashboard: React.FC = () => {
               <IonCol size="6">
                 <div className="stat-card vet-stat">
                   <div className="stat-number">{todayAppointments.length}</div>
-                  <div className="stat-label">Citas Hoy</div>
+                  <div className="stat-label">Citas pendientes</div>
                 </div>
               </IonCol>
               <IonCol size="6">

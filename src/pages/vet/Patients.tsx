@@ -91,9 +91,12 @@ const Patients: React.FC = () => {
     if (petAppointments.length === 0) return null;
 
     // Ordenar por fecha más reciente
-    const sorted = petAppointments.sort((a, b) => 
-      new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
-    );
+    const sorted = petAppointments.sort((a, b) => {
+      // Comparar directamente las fechas en formato YYYY-MM-DD
+      if (a.fecha > b.fecha) return -1;
+      if (a.fecha < b.fecha) return 1;
+      return 0;
+    });
 
     return sorted[0];
   };
@@ -104,23 +107,62 @@ const Patients: React.FC = () => {
       return { text: 'Sin historial', class: 'badge-info' };
     }
 
+    // Obtener la fecha de hoy en formato YYYY-MM-DD
     const today = new Date();
-    const apptDate = new Date(lastAppt.fecha);
-    const daysDiff = Math.floor((today.getTime() - apptDate.getTime()) / (1000 * 60 * 60 * 24));
+    const todayYear = today.getFullYear();
+    const todayMonth = String(today.getMonth() + 1).padStart(2, '0');
+    const todayDay = String(today.getDate()).padStart(2, '0');
+    const todayDate = `${todayYear}-${todayMonth}-${todayDay}`;
 
-    if (daysDiff === 0 || lastAppt.fecha === '2024-11-02') {
+    // Calcular diferencia de días comparando strings de fecha
+    const daysDiff = calculateDaysDifference(lastAppt.fecha, todayDate);
+
+    if (lastAppt.fecha === todayDate) {
       return { text: 'Última visita: Hoy', class: 'badge-success' };
     } else if (daysDiff <= 7) {
-      return { text: `Última visita: hace ${daysDiff} días`, class: 'badge-success' };
+      return { text: `Última visita: hace ${daysDiff} día${daysDiff === 1 ? '' : 's'}`, class: 'badge-success' };
+    } else if (daysDiff <= 30) {
+      return { text: `Última visita: hace ${daysDiff} días`, class: 'badge-warning' };
     } else {
-      return { text: `Última visita: ${lastAppt.fecha}`, class: 'badge-info' };
+      // Formatear la fecha para mostrar
+      const formattedDate = formatDate(lastAppt.fecha);
+      return { text: `Última visita: ${formattedDate}`, class: 'badge-info' };
     }
   };
 
+  // Función auxiliar para calcular diferencia de días entre dos fechas en formato YYYY-MM-DD
+  const calculateDaysDifference = (dateStr1: string, dateStr2: string): number => {
+    const [year1, month1, day1] = dateStr1.split('-').map(Number);
+    const [year2, month2, day2] = dateStr2.split('-').map(Number);
+    
+    const date1 = new Date(year1, month1 - 1, day1);
+    const date2 = new Date(year2, month2 - 1, day2);
+    
+    const diffTime = Math.abs(date2.getTime() - date1.getTime());
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays;
+  };
+
+  // Función auxiliar para formatear fecha YYYY-MM-DD a formato legible
+  const formatDate = (dateStr: string): string => {
+    const [year, month, day] = dateStr.split('-');
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return `${day} ${months[parseInt(month) - 1]} ${year}`;
+  };
+
   const hasUpcomingAppointment = (petId: number) => {
+    // Obtener la fecha de hoy
+    const today = new Date();
+    const todayYear = today.getFullYear();
+    const todayMonth = String(today.getMonth() + 1).padStart(2, '0');
+    const todayDay = String(today.getDate()).padStart(2, '0');
+    const todayDate = `${todayYear}-${todayMonth}-${todayDay}`;
+
     const upcoming = appointments.find(a => 
       a.mascotaId === petId && 
-      a.estado === 'pendiente'
+      a.estado === 'pendiente' &&
+      a.fecha >= todayDate  // Cita futura o de hoy
     );
     return upcoming;
   };
@@ -168,7 +210,8 @@ const Patients: React.FC = () => {
                 <IonCard 
                   key={pet.id} 
                   className="patient-card"
-                  onClick={() => alert(`Ver historial de ${pet.nombre} - Función en desarrollo`)}
+                  //onClick={() => alert(`Ver historial de ${pet.nombre} - Función en desarrollo`)}
+                  onClick={() => history.push(`/vet/pet-history/${pet.id}`)}
                 >
                   <IonCardContent>
                     <div className="patient-card-content">

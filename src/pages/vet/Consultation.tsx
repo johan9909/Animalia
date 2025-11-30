@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   IonContent,
   IonPage,
@@ -45,14 +45,15 @@ const Consultation: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
- 
-     const loadData = async () => {
-
+  const loadData = async () => {
+    try {
+      setIsLoading(true);
       await sqliteService.initDB();
 
       const allAppointments = await sqliteService.getAppointments();
-      const foundAppointment = allAppointments.find((a  : any)=> a.id === parseInt(id));
+      const foundAppointment = allAppointments.find((a: any) => a.id === parseInt(id));
       
       if (foundAppointment) {
         setAppointment(foundAppointment);
@@ -66,73 +67,122 @@ const Consultation: React.FC = () => {
 
         // Cargar mascota
         const allPets = await sqliteService.getPets();
-        const foundPet = allPets.find((p : any) => p.id === foundAppointment.mascotaId);
+        const foundPet = allPets.find((p: any) => p.id === foundAppointment.mascotaId);
         setPet(foundPet);
         
-        if (foundPet) {
+        if (foundPet && !foundAppointment.pesoActual) {
           setPesoActual(foundPet.peso.toString());
         }
 
         // Cargar cliente
         const allUsers = await sqliteService.getUsers();
-        const foundClient = allUsers.find((u : any) => u.id === foundAppointment.clienteId);
+        const foundClient = allUsers.find((u: any) => u.id === foundAppointment.clienteId);
         setClient(foundClient);
       }
+    } catch (error) {
+      console.error('Error loading consultation data:', error);
+      setToastMessage('Error al cargar los datos de la consulta');
+      setShowToast(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    };
- 
+  useIonViewWillEnter(() => {
+    loadData();
+  });
 
-    useIonViewWillEnter(() => {
-        loadData();
-    });
-
-  const handleSaveConsultation = () => {
+  const handleSaveConsultation = async () => {
     if (!diagnostico || !tratamiento) {
       setToastMessage('Por favor completa al menos el diagnóstico y tratamiento');
       setShowToast(true);
       return;
     }
 
-    setLoading(true);
+    try {
+      setLoading(true);
 
-    // Actualizar la cita con los datos de la consulta
-    sqliteService.updateAppointment(parseInt(id), {
-      sintomas,
-      temperatura: temperatura ? parseFloat(temperatura) : undefined,
-      pesoActual: pesoActual ? parseFloat(pesoActual) : undefined,
-      diagnostico,
-      tratamiento,
-      estado: 'completada'
-    });
-
-        
-
-    // Actualizar el peso de la mascota si cambió
-   if (pet && pesoActual && parseFloat(pesoActual) !== pet.peso) {
-      sqliteService.updatePet(pet.id, {
-        peso: parseFloat(pesoActual)
+      // Actualizar la cita con los datos de la consulta
+      await sqliteService.updateAppointment(parseInt(id), {
+        sintomas,
+        temperatura: temperatura ? parseFloat(temperatura) : undefined,
+        pesoActual: pesoActual ? parseFloat(pesoActual) : undefined,
+        diagnostico,
+        tratamiento,
+        estado: 'completada'
       });
+
+      // Actualizar el peso de la mascota si cambió
+      if (pet && pesoActual && parseFloat(pesoActual) !== pet.peso) {
+        await sqliteService.updatePet(pet.id, {
+          peso: parseFloat(pesoActual)
+        });
+      }
+
+      setToastMessage('¡Consulta guardada exitosamente!');
+      setShowToast(true);
+
+      setTimeout(() => {
+        history.push('/vet/dashboard');
+      }, 1500);
+    } catch (error) {
+      console.error('Error saving consultation:', error);
+      setToastMessage('Error al guardar la consulta');
+      setShowToast(true);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-    setToastMessage('¡Consulta guardada exitosamente!');
-    setShowToast(true);
-
-    setTimeout(() => {
-      history.push('/vet/dashboard');
-    }, 1500);
-
-   /* setTimeout(() => {
-        window.location.href = '/vet/dashboard';
-    }, 1500);*/
   };
 
   const getPetEmoji = (especie: string) => {
     return especie?.toLowerCase() === 'perro' ? '🐕' : '🐈';
   };
 
+  // Loading state
+  if (isLoading) {
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar className="vet-toolbar">
+            <IonButtons slot="start">
+              <IonBackButton defaultHref="/vet/dashboard" color="light" />
+            </IonButtons>
+            <IonTitle color="light">Consulta 🩺</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <IonLoading isOpen={true} message="Cargando consulta..." />
+          </div>
+        </IonContent>
+      </IonPage>
+    );
+  }
+
+  // No data found
   if (!appointment || !pet) {
-    return <div>Cargando...</div>;
+    return (
+      <IonPage>
+        <IonHeader>
+          <IonToolbar className="vet-toolbar">
+            <IonButtons slot="start">
+              <IonBackButton defaultHref="/vet/dashboard" color="light" />
+            </IonButtons>
+            <IonTitle color="light">Consulta 🩺</IonTitle>
+          </IonToolbar>
+        </IonHeader>
+        <IonContent>
+          <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+            <div style={{ fontSize: '60px', marginBottom: '20px' }}>⚠️</div>
+            <h2>No se encontró la consulta</h2>
+            <p>La consulta solicitada no existe o no está disponible.</p>
+            <IonButton onClick={() => history.push('/vet/dashboard')}>
+              Volver al Dashboard
+            </IonButton>
+          </div>
+        </IonContent>
+      </IonPage>
+    );
   }
 
   return (
@@ -163,8 +213,8 @@ const Consultation: React.FC = () => {
                 </div>
               </div>
               <div className="client-info">
-                <p><strong>Dueño:</strong> {client?.nombre}</p>
-                <p><strong>Teléfono:</strong> {client?.telefono}</p>
+                <p><strong>Dueño:</strong> {client?.nombre || 'No disponible'}</p>
+                <p><strong>Teléfono:</strong> {client?.telefono || 'No disponible'}</p>
               </div>
             </IonCardContent>
           </IonCard>

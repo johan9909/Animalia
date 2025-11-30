@@ -156,14 +156,7 @@ const VetProfile: React.FC = () => {
             Editar Perfil
           </IonButton>
 
-          <IonButton 
-            expand="block" 
-            fill="outline"
-            className="config-button-vet"
-            onClick={() => alert('Función de configuración en desarrollo')}
-          >
-            Configuración
-          </IonButton>
+         
 
           <IonButton 
             expand="block" 
